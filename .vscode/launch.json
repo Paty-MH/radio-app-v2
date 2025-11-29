@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "Flutter (lib\\services\\app_service.dart)",
+            "type": "dart",
+            "request": "launch",
+            "cwd": "radio_app",
+            "program": "lib\\services\\app_service.dart"
+        }
+    ]
+}

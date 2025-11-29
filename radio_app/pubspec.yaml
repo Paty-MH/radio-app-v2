@@ -1,0 +1,65 @@
+name: radio_app
+description: "App de radio con múltiples estaciones"
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Compartir
+  share_plus: ^10.0.2
+
+  # Información de versión
+  package_info_plus: ^8.0.0
+
+  # Reproductor
+  just_audio: ^0.9.39
+  audio_session: ^0.1.18
+
+  # Just Audio Background
+  just_audio_background: ^0.0.1-beta.17
+
+  # Streams
+  rxdart: ^0.27.7
+
+  # Estado
+  provider: ^6.1.2
+  path_provider: ^2.1.2
+
+  # UI
+  carousel_slider: ^5.0.0
+  url_launcher: ^6.3.1
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.5.3
+  font_awesome_flutter: ^10.12.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # IMÁGENES
+    - assets/images/logo.png
+    - assets/images/onboarding.png
+    - assets/images/program_1.png
+    - assets/images/prog1.png
+    - assets/images/prog2.png
+    - assets/images/prog3.png
+    - assets/images/prog4.png
+    - assets/images/station1.png
+    - assets/images/station2.png
+    - assets/images/header_music.png
+    - assets/images/logoRT.png
+
+    # ICONOS REDES SOCIALES
+    - assets/icons/facebook.png
+    - assets/icons/instagram.png
+    - assets/icons/x.webp
+    - assets/icons/youtube.png
+    - assets/icons/tiktok.png
+    - assets/icons/whatsapp.png
+    - assets/icons/web.png
