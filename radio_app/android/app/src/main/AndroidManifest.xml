@@ -1,23 +1,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.radio_app">
 
-    <!-- PERMISOS NECESARIOS -->
+    <!-- PERMISOS -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:label="radio_app"
         android:name="${applicationName}"
+        android:label="radio_app"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
 
-        <!-- SERVICIO DE JUST AUDIO BACKGROUND -->
+        <!-- SERVICIO JUST AUDIO -->
         <service
             android:name="com.ryanheise.audio.AudioService"
             android:enabled="true"
-            android:exported="false">
-        </service>
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <activity
             android:name=".MainActivity"
@@ -29,7 +30,6 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- TEMA NORMAL DE FLUTTER -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
@@ -40,14 +40,12 @@
             </intent-filter>
         </activity>
 
-        <!-- REQUERIDO POR FLUTTER -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-
     </application>
 
-    <!-- PERMISO PARA CONSULTAR OTRAS APPS (NO BORRAR) -->
+    <!-- CONSULTA DE OTRAS APPS -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
