@@ -1,18 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import '../helpers/providers/audio_provider.dart';
-import '../helpers/constants.dart';
 
-class MiniPlayer extends StatelessWidget {
+class MiniPlayer extends StatefulWidget {
   const MiniPlayer({super.key});
+
+  @override
+  State<MiniPlayer> createState() => _MiniPlayerState();
+}
+
+class _MiniPlayerState extends State<MiniPlayer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
     final current = audio.state.currentStation;
 
-    // Si no hay estación activa, no mostrar nada
     if (current == null) return const SizedBox.shrink();
+
+    // 🔥 Si está reproduciendo, gira — si no, pausa
+    if (audio.state.playing) {
+      _rotationController.repeat();
+    } else {
+      _rotationController.stop();
+    }
 
     return Container(
       height: 70,
@@ -30,14 +59,17 @@ class MiniPlayer extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Imagen de la estación
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              current.imageAsset,
-              width: 55,
-              height: 55,
-              fit: BoxFit.cover,
+          // 🔥 Imagen girando como disco
+          RotationTransition(
+            turns: _rotationController,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(100),
+              child: Image.asset(
+                current.imageAsset,
+                width: 55,
+                height: 55,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
 
@@ -71,7 +103,7 @@ class MiniPlayer extends StatelessWidget {
             ),
           ),
 
-          // Botón Play / Pause (corregido)
+          // Botón Play/Pause
           IconButton(
             icon: Icon(
               audio.state.playing
@@ -97,4 +129,8 @@ class MiniPlayer extends StatelessWidget {
       ),
     );
   }
+}
+
+extension on PlayerState {
+   get currentStation => null;
 }
