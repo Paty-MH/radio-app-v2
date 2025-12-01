@@ -29,11 +29,8 @@ class _PlayerScreenState extends State<PlayerScreen>
 
     _rotationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 12),
     );
-
-    // ❗ EL CONTROLADOR NO INICIA AUTOMÁTICAMENTE
-    // Solo gira cuando haya "playing = true"
   }
 
   @override
@@ -52,10 +49,9 @@ class _PlayerScreenState extends State<PlayerScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-
       body: Stack(
         children: [
-          // ⭐ IMAGEN DE FONDO BORROSA
+          // ⭐ FONDO BORROSO
           Positioned.fill(
             child: Image.asset(
               widget.artUrl,
@@ -65,25 +61,25 @@ class _PlayerScreenState extends State<PlayerScreen>
 
           Positioned.fill(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withOpacity(0.40),
               ),
             ),
           ),
 
-          // ⭐ CONTENIDO PRINCIPAL
+          // ⭐ CONTENIDO
           Column(
             children: [
               const SizedBox(height: 30),
 
-              // ⭐ DISCO QUE GIRA SOLO SI ESTÁ REPRODUCIENDO
+              // ⭐ DISCO GIRATORIO
               StreamBuilder<bool>(
                 stream: audio.playingStream,
-                builder: (context, snap) {
-                  final playing = snap.data ?? false;
+                builder: (context, snapshot) {
+                  final isPlaying = snapshot.data ?? false;
 
-                  if (playing) {
+                  if (isPlaying) {
                     _rotationController.repeat();
                   } else {
                     _rotationController.stop();
@@ -94,7 +90,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                       turns: _rotationController,
                       child: CircleAvatar(
                         radius: 120,
-                        backgroundColor: Colors.black,
                         backgroundImage: AssetImage(widget.artUrl),
                       ),
                     ),
@@ -102,59 +97,76 @@ class _PlayerScreenState extends State<PlayerScreen>
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 25),
 
+              // ⭐ NOMBRE DE LA ESTACIÓN
               Text(
                 widget.stationName,
                 style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
 
               const SizedBox(height: 6),
 
+              // ⭐ ICY METADATA
               StreamBuilder<String>(
                 stream: audio.icyStream,
-                builder: (context, snap) {
-                  final title = snap.data ?? "En vivo";
+                builder: (context, snapshot) {
+                  final icy = snapshot.data ?? "Cargando...";
+
                   return Text(
-                    title.isNotEmpty ? title : "En vivo",
-                    style: const TextStyle(color: Colors.white70),
+                    icy.isNotEmpty ? icy : "Sin información",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
                   );
                 },
               ),
 
-              const SizedBox(height: 40),
+              const Spacer(),
 
-              // ⭐ BOTÓN PLAY/PAUSE
+              // ⭐ BOTONES PLAY / PAUSE
               StreamBuilder<bool>(
                 stream: audio.playingStream,
-                builder: (context, snap) {
-                  final playing = snap.data ?? false;
+                builder: (context, snapshot) {
+                  final playing = snapshot.data ?? false;
 
-                  return IconButton(
-                    iconSize: 84,
-                    icon: Icon(
-                      playing ? Icons.pause_circle : Icons.play_circle,
-                      color: Colors.white,
-                    ),
-                    onPressed: () async {
-                      if (playing) {
-                        await audio.pause();
-                      } else {
-                        await audio.playStation(
-                          url: widget.streamUrl,
-                          title: widget.stationName,
-                          artist: "",
-                          artUrl: widget.artUrl,
-                        );
-                      }
-                    },
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // PLAY / PAUSE BUTTON
+                      IconButton(
+                        onPressed: () {
+                          if (playing) {
+                            audio.pause();
+                          } else {
+                            audio.playStation(
+                              url: widget.streamUrl,
+                              title: widget.stationName,
+                              artist: widget.stationName,
+                              artUrl: widget.artUrl,
+                            );
+                          }
+                        },
+                        icon: Icon(
+                          playing
+                              ? Icons.pause_circle_filled
+                              : Icons.play_circle_fill,
+                          size: 90,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   );
                 },
               ),
+
+              const SizedBox(height: 50),
             ],
           ),
         ],
