@@ -19,8 +19,8 @@ class _MiniPlayerState extends State<MiniPlayer>
     super.initState();
     _rotationController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
+      duration: const Duration(seconds: 6),
+    );
   }
 
   @override
@@ -36,7 +36,7 @@ class _MiniPlayerState extends State<MiniPlayer>
 
     if (current == null) return const SizedBox.shrink();
 
-    // 🔥 Si está reproduciendo, gira — si no, pausa
+    // 🔥 Controlar animación según play/pause
     if (audio.state.playing) {
       _rotationController.repeat();
     } else {
@@ -44,26 +44,36 @@ class _MiniPlayerState extends State<MiniPlayer>
     }
 
     return Container(
-      height: 70,
+      height: 85,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFF7D348),
+            Color(0xFFD4A224),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
+        ),
         boxShadow: [
           BoxShadow(
-            offset: const Offset(0, -3),
+            color: Colors.black26,
             blurRadius: 6,
-            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, -2),
           ),
         ],
       ),
       child: Row(
         children: [
-          // 🔥 Imagen girando como disco
+          // 🎵 Imagen girando como disco
           RotationTransition(
             turns: _rotationController,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(100),
+            child: ClipOval(
               child: Image.asset(
                 current.imageAsset,
                 width: 55,
@@ -73,9 +83,9 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
           ),
 
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
 
-          // Nombre y slogan
+          // ✔ Información
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -84,17 +94,18 @@ class _MiniPlayerState extends State<MiniPlayer>
                 Text(
                   current.name,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   current.slogan,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 13,
-                    color: Colors.grey[600],
+                    color: Colors.black87,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -103,13 +114,13 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
           ),
 
-          // Botón Play/Pause
+          // ▶ Botón play/pause
           IconButton(
+            iconSize: 40,
             icon: Icon(
               audio.state.playing
                   ? Icons.pause_circle_filled
                   : Icons.play_circle_fill,
-              size: 40,
               color: Colors.black,
             ),
             onPressed: () {
@@ -132,5 +143,5 @@ class _MiniPlayerState extends State<MiniPlayer>
 }
 
 extension on PlayerState {
-   get currentStation => null;
+  get currentStation => null;
 }

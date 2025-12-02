@@ -1,3 +1,5 @@
+// lib/screens/home_screen.dart
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,7 +13,7 @@ import '../widgets/program_carousel.dart';
 import '../models/program_model.dart';
 
 import '../widgets/app_drawer.dart';
-import '../widgets/social_icons.dart'; // ⬅ AGREGADO
+import '../widgets/social_icons.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,6 +43,7 @@ class HomeScreen extends StatelessWidget {
                   child: StationCard(
                     station: s,
                     onTap: () {
+                      // Guardar estación actual y reproducir
                       context.read<AppProvider>().setCurrentStation(i);
                       context.read<AudioProvider>().playStation(
                             url: s.url,
@@ -88,9 +91,9 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // ⭐⭐⭐ ICONOS DE REDES SOCIALES ⭐⭐⭐
+              // ICONOS DE REDES SOCIALES
               const SocialIconsSection(),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
               const SizedBox(height: 430),
             ],
           ),
@@ -295,16 +298,58 @@ class HomeScreen extends StatelessWidget {
 }
 
 // ───────────────────────────────────────────
-// MINI PLAYER
+// MINI PLAYER (estado + animación del disco)
 // ───────────────────────────────────────────
-class _MiniPlayer extends StatelessWidget {
+class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
+
+  @override
+  State<_MiniPlayer> createState() => _MiniPlayerState();
+}
+
+class _MiniPlayerState extends State<_MiniPlayer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    );
+    // No repetir automáticamente: controlamos según el stream
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
+  // Helper para arrancar/pausar animación de forma segura
+  void _updateRotation(bool playing) {
+    if (playing) {
+      if (!_rotationController.isAnimating) {
+        _rotationController.repeat();
+      }
+    } else {
+      if (_rotationController.isAnimating) {
+        _rotationController.stop(canceled: false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
     final app = context.watch<AppProvider>();
-    final s = stations[app.currentStationIndex];
+
+    // Si no hay estación seleccionada, no mostramos mini player
+    final int idx = app.currentStationIndex;
+    if (idx < 0 || idx >= stations.length) return const SizedBox.shrink();
+    final s = stations[idx];
 
     return GestureDetector(
       onTap: () => Navigator.pushNamed(context, '/player'),
@@ -329,18 +374,45 @@ class _MiniPlayer extends StatelessWidget {
         ),
         child: Row(
           children: [
-            ClipOval(
-              child: Image.asset(
-                s.imageAsset,
-                width: 54,
-                height: 54,
-                fit: BoxFit.cover,
-              ),
+            // DISCO CIRCULAR (gira cuando reproduce)
+            StreamBuilder<bool>(
+              stream: audio.playingStream,
+              builder: (context, snap) {
+                final playing = snap.data ?? false;
+
+                // actualizar animación
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _updateRotation(playing);
+                });
+
+                return RotationTransition(
+                  turns: _rotationController,
+                  child: Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                      // carátula dentro del círculo
+                      image: DecorationImage(
+                        image: AssetImage(s.imageAsset),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(width: 12),
 
-            // TITULOS DEL MINI PLAYER
+            // TITULOS
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -353,41 +425,64 @@ class _MiniPlayer extends StatelessWidget {
                       color: Colors.black,
                       fontSize: 14,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    audio.currentIcyTitle.isNotEmpty
-                        ? audio.currentIcyTitle
-                        : s.slogan,
-                    style: GoogleFonts.poppins(
-                      color: Colors.black87,
-                      fontSize: 12,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  // Mostrar ICY (título) si existe, sino slogan
+                  StreamBuilder<String>(
+                    stream: audio.icyStream,
+                    builder: (context, snap) {
+                      final t = snap.data ?? '';
+                      final subtitle = t.isNotEmpty ? t : s.slogan;
+                      return Text(
+                        subtitle,
+                        style: GoogleFonts.poppins(
+                          color: Colors.black87,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
                   ),
                 ],
               ),
             ),
 
-            IconButton(
-              icon: Icon(
-                audio.state.playing
-                    ? Icons.pause_circle_filled
-                    : Icons.play_circle_fill,
-                size: 40,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                if (audio.state.playing) {
-                  audio.pause();
-                } else {
-                  audio.playStation(
-                    url: s.url,
-                    title: s.name,
-                    artist: s.slogan,
-                    artUrl: s.imageAsset,
-                  );
-                }
+            // BOTÓN PLAY/PAUSE
+            StreamBuilder<bool>(
+              stream: audio.playingStream,
+              builder: (context, snap) {
+                final playing = snap.data ?? false;
+
+                return IconButton(
+                  icon: Icon(
+                    playing ? Icons.pause_circle_filled : Icons.play_circle,
+                    size: 40,
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    // evitar que el gesto del padre se active (tap abre player)
+                    if (playing) {
+                      audio.pause();
+                    } else {
+                      // si ya hay una fuente cargada, reanudar
+                      if (audio.state.playing == false &&
+                          audio.stateStream != null) {
+                        // si no había fuente cargada, reproducir esta estación
+                        audio.playStation(
+                          url: s.url,
+                          title: s.name,
+                          artist: s.slogan,
+                          artUrl: s.imageAsset,
+                        );
+                      } else {
+                        audio.resume();
+                      }
+                    }
+                  },
+                );
               },
             ),
           ],

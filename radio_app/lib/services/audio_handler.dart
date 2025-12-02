@@ -46,3 +46,7 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler {
   @override
   Future<void> stop() => _player.stop();
 }
+
+extension on MediaItem {
+  void add(MediaItem mediaItem) {}
+}

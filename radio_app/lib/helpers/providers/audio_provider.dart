@@ -10,6 +10,7 @@ class AudioProvider extends ChangeNotifier {
   final BehaviorSubject<String> _icyTitleSubject =
       BehaviorSubject<String>.seeded('');
 
+  // STREAMS
   Stream<String> get icyStream => _icyTitleSubject.stream;
   String get currentIcyTitle => _icyTitleSubject.value;
 
@@ -23,17 +24,29 @@ class AudioProvider extends ChangeNotifier {
   int _retryCount = 0;
   final int _maxRetries = 3;
 
+  // 🔥 Datos de estación actual
+  String? _currentTitle;
+  String? _currentArtist;
+  String? _currentArt;
+  String? _currentUrl;
+
+  // Getters públicos
+  String? get currentTitle => _currentTitle;
+  String? get currentArtist => _currentArtist;
+  String? get currentArt => _currentArt;
+  String? get currentUrl => _currentUrl;
+
   AudioProvider() {
     _init();
 
-    // METADATA ICY (título dinámico)
+    // METADATA ICY
     _player.icyMetadataStream.listen((metadata) {
       final icy = metadata?.info?.title ?? "";
       _icyTitleSubject.add(icy);
       notifyListeners();
     });
 
-    // Cambios del Player
+    // Notificar cambios
     _player.playerStateStream.listen((_) => notifyListeners());
 
     // Reconexión automática
@@ -57,7 +70,9 @@ class AudioProvider extends ChangeNotifier {
     }
   }
 
-  // 🔊 Reproducir estación
+  // ───────────────────────────────────────────────
+  // 🔊 REPRODUCIR ESTACIÓN
+  // ───────────────────────────────────────────────
   Future<void> playStation({
     required String url,
     required String title,
@@ -67,7 +82,14 @@ class AudioProvider extends ChangeNotifier {
     try {
       _retryCount = 0;
 
-      // Este MediaItem activa la notificación del background
+      // 🔥 GUARDAR DATOS DE LA ESTACIÓN ACTUAL
+      _currentTitle = title;
+      _currentArtist = artist;
+      _currentArt = artUrl;
+      _currentUrl = url;
+
+      notifyListeners();
+
       final mediaItem = MediaItem(
         id: url,
         album: artist,
@@ -93,19 +115,19 @@ class AudioProvider extends ChangeNotifier {
     }
   }
 
-  // Pausar
+  // ───────────────────────────────────────────────
+  // CONTROLES
+  // ───────────────────────────────────────────────
   Future<void> pause() async {
     await _player.pause();
     notifyListeners();
   }
 
-  // Continuar
   Future<void> resume() async {
     await _player.play();
     notifyListeners();
   }
 
-  // Detener
   Future<void> stop() async {
     await _player.stop();
     notifyListeners();

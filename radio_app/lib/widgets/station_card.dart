@@ -1,96 +1,114 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:radio_app/helpers/constants.dart';
+
+import '../helpers/providers/audio_provider.dart';
+import '../helpers/providers/app_provider.dart';
 import '../models/station_model.dart';
 
 class StationCard extends StatelessWidget {
   final Station station;
   final VoidCallback onTap;
-  final VoidCallback? onMore;
   final VoidCallback? onLongPress;
 
   const StationCard({
     super.key,
     required this.station,
     required this.onTap,
-    this.onMore,
     this.onLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        height: 105, // 🔥 estilo más alto como la app real
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+    final audio = context.watch<AudioProvider>();
+    final app = context.watch<AppProvider>();
 
-          // 🔥 sombra suave estilo premium
-          boxShadow: [
+    final bool isCurrent = app.currentStationIndex != null &&
+        stations[app.currentStationIndex!].name == station.name;
+
+    final bool isPlaying = isCurrent && audio.state.playing;
+
+    return GestureDetector(
+      onLongPress: onLongPress,
+      onTap: () async {
+        if (!isCurrent) {
+          // Reproduce otra estación nueva
+          app.setCurrentStation(stations.indexOf(station));
+          audio.playStation(
+            url: station.url,
+            title: station.name,
+            artist: station.slogan,
+            artUrl: station.imageAsset,
+          );
+        } else {
+          // Pausa o reanuda la misma estación
+          isPlaying ? audio.pause() : audio.resume();
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isPlaying
+              ? const Color(0xFFFFE6E6) // 🔴 fondo rojo suave
+              : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+              color: Color(0x22000000),
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            )
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
         child: Row(
           children: [
-            // 🔥 Imagen más redondeada como la referencia real
+            // IMAGEN DEL LOGO
             ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 station.imageAsset,
-                width: 70,
-                height: 70,
+                width: 55,
+                height: 55,
                 fit: BoxFit.cover,
               ),
             ),
 
-            const SizedBox(width: 14),
+            const SizedBox(width: 16),
 
-            // 🔥 Textos con Poppins como la app real
+            // TITULO Y SUBTITULO
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     station.name,
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                      height: 1.1,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 3),
                   Text(
                     station.slogan,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
                       color: Colors.black54,
-                      height: 1.2,
+                      fontSize: 13,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // 🔥 Icono play moderno como en la app real
-            IconButton(
-              icon: const Icon(
-                Icons.play_circle_fill,
-                size: 40,
-                color: Colors.black87,
-              ),
-              onPressed: onTap,
+            // BOTÓN PLAY / PAUSE
+            Icon(
+              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
+              size: 34,
+              color: isPlaying ? Colors.red : Colors.black87,
             ),
           ],
         ),
