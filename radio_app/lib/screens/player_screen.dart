@@ -31,6 +31,15 @@ class _PlayerScreenState extends State<PlayerScreen>
       vsync: this,
       duration: const Duration(seconds: 12),
     );
+
+    /// Arranca el stream cuando se abre la pantalla
+    final audio = Provider.of<AudioProvider>(context, listen: false);
+    audio.playStation(
+      url: widget.streamUrl,
+      title: widget.stationName,
+      artist: "",
+      artUrl: widget.artUrl,
+    );
   }
 
   @override
@@ -43,6 +52,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   Widget build(BuildContext context) {
     final audio = Provider.of<AudioProvider>(context);
 
+    final art = widget.artUrl;
+    final title = widget.stationName;
+    final url = widget.streamUrl;
+    final artist = audio.currentArtist;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -54,7 +68,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           // ⭐ FONDO BORROSO
           Positioned.fill(
             child: Image.asset(
-              widget.artUrl,
+              art,
               fit: BoxFit.cover,
             ),
           ),
@@ -63,7 +77,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(
-                color: Colors.black.withOpacity(0.40),
+                color: Colors.black.withOpacity(0.45),
               ),
             ),
           ),
@@ -80,7 +94,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   final isPlaying = snapshot.data ?? false;
 
                   if (isPlaying) {
-                    _rotationController.repeat();
+                    if (!_rotationController.isAnimating) {
+                      _rotationController.repeat();
+                    }
                   } else {
                     _rotationController.stop();
                   }
@@ -90,7 +106,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                       turns: _rotationController,
                       child: CircleAvatar(
                         radius: 120,
-                        backgroundImage: AssetImage(widget.artUrl),
+                        backgroundImage: AssetImage(art),
                       ),
                     ),
                   );
@@ -101,24 +117,26 @@ class _PlayerScreenState extends State<PlayerScreen>
 
               // ⭐ NOMBRE DE LA ESTACIÓN
               Text(
-                widget.stationName,
+                title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
 
               // ⭐ ICY METADATA
               StreamBuilder<String>(
                 stream: audio.icyStream,
                 builder: (context, snapshot) {
-                  final icy = snapshot.data ?? "Cargando...";
+                  final icy = snapshot.data ?? "";
+                  final safeIcy = icy.trim();
+                  final safeArtist = (artist ?? "").trim();
 
                   return Text(
-                    icy.isNotEmpty ? icy : "Sin información",
+                    safeIcy.isNotEmpty ? safeIcy : safeArtist,
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -139,17 +157,16 @@ class _PlayerScreenState extends State<PlayerScreen>
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // PLAY / PAUSE BUTTON
                       IconButton(
                         onPressed: () {
                           if (playing) {
                             audio.pause();
                           } else {
                             audio.playStation(
-                              url: widget.streamUrl,
-                              title: widget.stationName,
-                              artist: widget.stationName,
-                              artUrl: widget.artUrl,
+                              url: url,
+                              title: title,
+                              artist: artist ?? "",
+                              artUrl: art,
                             );
                           }
                         },
@@ -166,7 +183,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 },
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 60),
             ],
           ),
         ],

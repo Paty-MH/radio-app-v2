@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:provider/provider.dart';
 import '../helpers/providers/audio_provider.dart';
 
@@ -32,12 +31,14 @@ class _MiniPlayerState extends State<MiniPlayer>
   @override
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
-    final current = audio.state.currentStation;
 
-    if (current == null) return const SizedBox.shrink();
+    // 🚨 Si no hay estación cargada, no mostrar nada
+    if (audio.currentTitle == null) {
+      return const SizedBox.shrink();
+    }
 
     // 🔥 Controlar animación según play/pause
-    if (audio.state.playing) {
+    if (audio.isPlaying) {
       _rotationController.repeat();
     } else {
       _rotationController.stop();
@@ -70,12 +71,12 @@ class _MiniPlayerState extends State<MiniPlayer>
       ),
       child: Row(
         children: [
-          // 🎵 Imagen girando como disco
+          // Imagen giratoria
           RotationTransition(
             turns: _rotationController,
             child: ClipOval(
               child: Image.asset(
-                current.imageAsset,
+                audio.currentArt ?? '',
                 width: 55,
                 height: 55,
                 fit: BoxFit.cover,
@@ -85,14 +86,14 @@ class _MiniPlayerState extends State<MiniPlayer>
 
           const SizedBox(width: 14),
 
-          // ✔ Información
+          // Nombre y slogan
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  current.name,
+                  audio.currentTitle ?? '',
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -102,7 +103,7 @@ class _MiniPlayerState extends State<MiniPlayer>
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  current.slogan,
+                  audio.currentArtist ?? '',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Colors.black87,
@@ -114,24 +115,24 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
           ),
 
-          // ▶ Botón play/pause
+          // Botón play/pause
           IconButton(
             iconSize: 40,
             icon: Icon(
-              audio.state.playing
+              audio.isPlaying
                   ? Icons.pause_circle_filled
                   : Icons.play_circle_fill,
               color: Colors.black,
             ),
             onPressed: () {
-              if (audio.state.playing) {
+              if (audio.isPlaying) {
                 audio.pause();
               } else {
                 audio.playStation(
-                  url: current.url,
-                  title: current.name,
-                  artist: current.slogan,
-                  artUrl: current.imageAsset,
+                  url: audio.currentUrl!,
+                  title: audio.currentTitle!,
+                  artist: audio.currentArtist!,
+                  artUrl: audio.currentArt!,
                 );
               }
             },
@@ -140,8 +141,4 @@ class _MiniPlayerState extends State<MiniPlayer>
       ),
     );
   }
-}
-
-extension on PlayerState {
-  get currentStation => null;
 }

@@ -30,7 +30,6 @@ class AudioProvider extends ChangeNotifier {
   String? _currentArt;
   String? _currentUrl;
 
-  // Getters públicos
   String? get currentTitle => _currentTitle;
   String? get currentArtist => _currentArtist;
   String? get currentArt => _currentArt;
@@ -39,23 +38,27 @@ class AudioProvider extends ChangeNotifier {
   AudioProvider() {
     _init();
 
-    // METADATA ICY
+    // METADATA ICY SEGURO
     _player.icyMetadataStream.listen((metadata) {
-      final icy = metadata?.info?.title ?? "";
+      final rawIcy = metadata?.info?.title;
+
+      // Convertir, limpiar y evitar nulls
+      final icy = (rawIcy ?? "").toString().trim();
+
       _icyTitleSubject.add(icy);
       notifyListeners();
     });
 
-    // Notificar cambios
+    // Notificar cambios de estado
     _player.playerStateStream.listen((_) => notifyListeners());
 
     // Reconexión automática
-    _player.playerStateStream.listen((state) async {
-      if (!state.playing &&
-          state.processingState == ProcessingState.idle &&
+    _player.playerStateStream.listen((ps) async {
+      if (!ps.playing &&
+          ps.processingState == ProcessingState.idle &&
           _retryCount < _maxRetries) {
         _retryCount++;
-        debugPrint("Intentando reconectar... $_retryCount");
+        debugPrint("Intentando reconectar... ($_retryCount)");
         await Future.delayed(const Duration(seconds: 2));
       }
     });
@@ -66,7 +69,7 @@ class AudioProvider extends ChangeNotifier {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
     } catch (e) {
-      debugPrint("Error inicializando audio session: $e");
+      debugPrint("Error en audio session: $e");
     }
   }
 
@@ -82,7 +85,7 @@ class AudioProvider extends ChangeNotifier {
     try {
       _retryCount = 0;
 
-      // 🔥 GUARDAR DATOS DE LA ESTACIÓN ACTUAL
+      // Guardar datos actuales
       _currentTitle = title;
       _currentArtist = artist;
       _currentArt = artUrl;
@@ -102,7 +105,10 @@ class AudioProvider extends ChangeNotifier {
 
       await _player.stop();
       await _player.setAudioSource(
-        AudioSource.uri(Uri.parse(url), tag: mediaItem),
+        AudioSource.uri(
+          Uri.parse(url),
+          tag: mediaItem,
+        ),
       );
 
       debugPrint("🎧 Reproduciendo...");
@@ -110,7 +116,7 @@ class AudioProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      debugPrint("❌ Error reproduciendo estación: $e");
+      debugPrint("❌ Error reproduciendo: $e");
       notifyListeners();
     }
   }
