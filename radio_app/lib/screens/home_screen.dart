@@ -43,7 +43,6 @@ class HomeScreen extends StatelessWidget {
                   child: StationCard(
                     station: s,
                     onTap: () {
-                      // Guardar estación actual y reproducir
                       context.read<AppProvider>().setCurrentStation(i);
                       context.read<AudioProvider>().playStation(
                             url: s.url,
@@ -57,7 +56,7 @@ class HomeScreen extends StatelessWidget {
                 );
               }),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
               // PROGRAMAS
               Padding(
@@ -91,14 +90,11 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // ICONOS DE REDES SOCIALES
               const SocialIconsSection(),
               const SizedBox(height: 25),
               const SizedBox(height: 430),
             ],
           ),
-
-          // MINI PLAYER
           const Align(
             alignment: Alignment.bottomCenter,
             child: _MiniPlayer(),
@@ -108,9 +104,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ───────────────────────────────────────────
-  // ENCABEZADO
-  // ───────────────────────────────────────────
+  // HEADER
   Widget _bannerHeader(BuildContext context) {
     return Container(
       height: 200,
@@ -150,37 +144,40 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // ───────────────────────────────────────────
   // TITULOS
-  // ───────────────────────────────────────────
   Widget _titleSection(String t1, String t2) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: RichText(
-        text: TextSpan(
-          style: GoogleFonts.poppins(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-          ),
-          children: [
-            TextSpan(text: '$t1 '),
-            TextSpan(
-              text: t2,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      child: SizedBox(
+        height: 25,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: RichText(
+            text: TextSpan(
               style: GoogleFonts.poppins(
-                color: Color(0xFFFFC400),
-                fontWeight: FontWeight.w800,
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                height: 1.0,
               ),
+              children: [
+                TextSpan(text: '$t1 '),
+                TextSpan(
+                  text: t2,
+                  style: GoogleFonts.poppins(
+                    color: Color(0xFFFFC400),
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // ───────────────────────────────────────────
-  // MODAL DE PROGRAMAS
-  // ───────────────────────────────────────────
+  // MODAL PROGRAMAS
   void showProgramModal(BuildContext context, Program p) {
     showModalBottomSheet(
       context: context,
@@ -189,105 +186,130 @@ class HomeScreen extends StatelessWidget {
       builder: (_) {
         return DraggableScrollableSheet(
           initialChildSize: 0.78,
-          minChildSize: 0.4,
+          minChildSize: 0.40,
           maxChildSize: 0.95,
           builder: (ctx, ctl) {
             return Container(
-              decoration: const BoxDecoration(
+              margin: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: ListView(
-                controller: ctl,
-                children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(20)),
-                        child: Image.asset(
-                          p.imageAsset,
-                          height: 240,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned(
-                        top: 12,
-                        left: 12,
-                        child: GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            child: Icon(Icons.close, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ],
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: ListView(
+                  controller: ctl,
+                  children: [
+                    Stack(
                       children: [
-                        Text(
-                          p.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w700,
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(20)),
+                          child: Image.asset(
+                            p.imageAsset,
+                            height: 240,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          p.description,
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          'Horarios de emisión',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: p.schedules.map((s) {
-                            return Container(
-                              width: 150,
-                              padding: const EdgeInsets.all(12),
+                        Positioned(
+                          top: 12,
+                          left: 12,
+                          child: GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.black12),
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(40),
                               ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    s.day,
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    '${s.start} - ${s.end}',
-                                    style: GoogleFonts.poppins(),
-                                  ),
-                                ],
+                              padding: const EdgeInsets.all(8),
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 22,
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 40),
                       ],
                     ),
-                  )
-                ],
+                    Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            p.description,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          Text(
+                            'Horarios de emisión',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: p.schedules.map((s) {
+                              return Container(
+                                width: 150,
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: Colors.black12),
+                                  color: const Color(0xFFF8F8F8),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      s.day,
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '${s.start} - ${s.end}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             );
           },
@@ -297,9 +319,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────
-// MINI PLAYER (estado + animación del disco)
-// ───────────────────────────────────────────
+// MINI PLAYER
 class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
 
@@ -319,7 +339,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
       vsync: this,
       duration: const Duration(seconds: 8),
     );
-    // No repetir automáticamente: controlamos según el stream
   }
 
   @override
@@ -328,7 +347,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
     super.dispose();
   }
 
-  // Helper para arrancar/pausar animación de forma segura
   void _updateRotation(bool playing) {
     if (playing) {
       if (!_rotationController.isAnimating) {
@@ -346,7 +364,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
     final audio = context.watch<AudioProvider>();
     final app = context.watch<AppProvider>();
 
-    // Si no hay estación seleccionada, no mostramos mini player
     final int idx = app.currentStationIndex;
     if (idx < 0 || idx >= stations.length) return const SizedBox.shrink();
     final s = stations[idx];
@@ -374,13 +391,11 @@ class _MiniPlayerState extends State<_MiniPlayer>
         ),
         child: Row(
           children: [
-            // DISCO CIRCULAR (gira cuando reproduce)
             StreamBuilder<bool>(
               stream: audio.playingStream,
               builder: (context, snap) {
                 final playing = snap.data ?? false;
 
-                // actualizar animación
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _updateRotation(playing);
                 });
@@ -399,7 +414,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
                           offset: const Offset(0, 3),
                         ),
                       ],
-                      // carátula dentro del círculo
                       image: DecorationImage(
                         image: AssetImage(s.imageAsset),
                         fit: BoxFit.cover,
@@ -409,10 +423,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
                 );
               },
             ),
-
             const SizedBox(width: 12),
-
-            // TITULOS
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -429,7 +440,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Mostrar ICY (título) si existe, sino slogan
                   StreamBuilder<String>(
                     stream: audio.icyStream,
                     builder: (context, snap) {
@@ -449,8 +459,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
                 ],
               ),
             ),
-
-            // BOTÓN PLAY/PAUSE
             StreamBuilder<bool>(
               stream: audio.playingStream,
               builder: (context, snap) {
@@ -463,23 +471,10 @@ class _MiniPlayerState extends State<_MiniPlayer>
                     color: Colors.black,
                   ),
                   onPressed: () {
-                    // evitar que el gesto del padre se active (tap abre player)
                     if (playing) {
                       audio.pause();
                     } else {
-                      // si ya hay una fuente cargada, reanudar
-                      if (audio.state.playing == false &&
-                          audio.stateStream != null) {
-                        // si no había fuente cargada, reproducir esta estación
-                        audio.playStation(
-                          url: s.url,
-                          title: s.name,
-                          artist: s.slogan,
-                          artUrl: s.imageAsset,
-                        );
-                      } else {
-                        audio.resume();
-                      }
+                      audio.resume();
                     }
                   },
                 );

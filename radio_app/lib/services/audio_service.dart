@@ -12,13 +12,7 @@ class RadioAudioHandler extends BaseAudioHandler {
     await _player.setUrl(url);
     await _player.play();
 
-    mediaItem.add(
-      MediaItem(
-        id: url,
-        title: title,
-        artist: artist,
-      ),
-    );
+    mediaItem.add(MediaItem(id: url, title: title, artist: artist));
   }
 
   Future<void> _broadcastState(PlaybackEvent event) async {
@@ -27,10 +21,7 @@ class RadioAudioHandler extends BaseAudioHandler {
     playbackState.add(
       playbackState.value.copyWith(
         playing: playing,
-        controls: [
-          MediaControl.pause,
-          MediaControl.play,
-        ],
+        controls: [MediaControl.pause, MediaControl.play],
         processingState: const {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,

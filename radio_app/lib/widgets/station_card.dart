@@ -24,38 +24,37 @@ class StationCard extends StatelessWidget {
     final audio = context.watch<AudioProvider>();
     final app = context.watch<AppProvider>();
 
-    // ⭐ Saber si esta estación es la estación actual
     final bool isCurrent = app.currentStationIndex != null &&
         stations[app.currentStationIndex!].name == station.name;
 
-    // ⭐ Saber si la estación actual está sonando
-    final bool isPlaying = isCurrent && audio.isPlaying;
+    final bool isPlaying = isCurrent && audio.state.playing;
 
     return GestureDetector(
       onLongPress: onLongPress,
       onTap: () async {
         if (!isCurrent) {
-          // Si el usuario cambia de estación
+          // Cambiar de estación y comenzar a reproducir
           app.setCurrentStation(stations.indexOf(station));
-
-          audio.playStation(
+          await audio.playStation(
             url: station.url,
             title: station.name,
             artist: station.slogan,
             artUrl: station.imageAsset,
           );
         } else {
-          // Si toca la misma estación
-          isPlaying ? audio.pause() : audio.resume();
+          // Alternar entre pausa y reproducción
+          if (audio.state.playing) {
+            await audio.pause();
+          } else {
+            await audio.resume();
+          }
         }
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isPlaying
-              ? const Color(0xFFFFE6E6) // Fondo suave rojo si está sonando
-              : Colors.white,
+          color: isPlaying ? const Color(0xFFFFE6E6) : Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
@@ -67,7 +66,7 @@ class StationCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // ⭐ LOGO
+            // IMAGEN
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
@@ -80,7 +79,7 @@ class StationCard extends StatelessWidget {
 
             const SizedBox(width: 16),
 
-            // ⭐ NOMBRE Y SLOGAN
+            // NOMBRE Y SLOGAN
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +106,7 @@ class StationCard extends StatelessWidget {
               ),
             ),
 
-            // ⭐ ICONO PLAY / PAUSE
+            // BOTÓN PLAY / PAUSE
             Icon(
               isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
               size: 34,

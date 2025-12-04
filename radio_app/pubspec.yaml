@@ -57,9 +57,19 @@ flutter:
 
     # ICONOS REDES SOCIALES
     - assets/icons/facebook.png
+    - assets/icons/facebook_1.png
+    - assets/icons/instagram_1.jpg
     - assets/icons/instagram.png
+    - assets/icons/Telefono.png
     - assets/icons/x.webp
+    - assets/icons/x.png
     - assets/icons/youtube.png
     - assets/icons/tiktok.png
     - assets/icons/whatsapp.png
     - assets/icons/web.png
+    - assets/icons/web.jpg
+    - assets/icons/down.png
+    - assets/icons/instagram_icon.png
+    - assets/icons/youtube_icono.png
+    - assets/icons/web_icono.png
+    - assets/icons/web_icono.png

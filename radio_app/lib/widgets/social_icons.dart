@@ -62,28 +62,28 @@ class SocialIconsSection extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _socialIcon(
-                      asset: "assets/icons/instagram.png",
+                      asset: "assets/icons/instagram_icon.png",
                       color: const Color(0xFFDD2A7B),
                       onTap: () =>
                           _open("https://www.instagram.com/radioactivatx/"),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     _socialIcon(
                       asset: "assets/icons/facebook.png",
                       color: const Color(0xFF3B5998),
                       onTap: () => _open(
                           "https://www.facebook.com/radioactivatx89.9/?utm_source=chatgpt.com"),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     _socialIcon(
                       asset: "assets/icons/x.webp",
                       color: Colors.black,
                       onTap: () => _open(
                           "https://x.com/RadioactivaTx?utm_source=chatgpt.com"),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     _socialIcon(
-                      asset: "assets/icons/youtube.png",
+                      asset: "assets/icons/youtube_icono.png",
                       color: Colors.red,
                       onTap: () =>
                           _open("https://www.youtube.com/@RadioactivaTX"),
@@ -103,15 +103,15 @@ class SocialIconsSection extends StatelessWidget {
                       onTap: () =>
                           _open("https://www.tiktok.com/@radioactiva.tx"),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     _socialIcon(
-                      asset: "assets/icons/whatsapp.png",
-                      color: const Color(0xFF25D366),
+                      asset: "assets/icons/Telefono.png",
+                      color: const Color.fromARGB(255, 71, 76, 217),
                       onTap: () => _open("https://wa.me/+524141199003"),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     _socialIcon(
-                      asset: "assets/icons/web.png",
+                      asset: "assets/icons/web_icono.png",
                       color: Colors.black,
                       onTap: () => _open(
                           "https://www.radioactivatx.org/?utm_source=chatgpt.com"),
