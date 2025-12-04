@@ -42,34 +42,8 @@ flutter:
   uses-material-design: true
 
   assets:
-    # IMÁGENES
-    - assets/images/logo.png
-    - assets/images/onboarding.png
-    - assets/images/program_1.png
-    - assets/images/prog1.png
-    - assets/images/prog2.png
-    - assets/images/prog3.png
-    - assets/images/prog4.png
-    - assets/images/station1.png
-    - assets/images/station2.png
-    - assets/images/header_music.png
-    - assets/images/logoRT.png
+    # Carpeta de imágenes
+    - assets/images/
 
-    # ICONOS REDES SOCIALES
-    - assets/icons/facebook.png
-    - assets/icons/facebook_1.png
-    - assets/icons/instagram_1.jpg
-    - assets/icons/instagram.png
-    - assets/icons/Telefono.png
-    - assets/icons/x.webp
-    - assets/icons/x.png
-    - assets/icons/youtube.png
-    - assets/icons/tiktok.png
-    - assets/icons/whatsapp.png
-    - assets/icons/web.png
-    - assets/icons/web.jpg
-    - assets/icons/down.png
-    - assets/icons/instagram_icon.png
-    - assets/icons/youtube_icono.png
-    - assets/icons/web_icono.png
-    - assets/icons/web_icono.png
+    # Carpeta de íconos (incluye todos los archivos dentro)
+    - assets/icons/

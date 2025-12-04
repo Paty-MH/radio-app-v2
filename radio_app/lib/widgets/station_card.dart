@@ -41,12 +41,18 @@ class StationCard extends StatelessWidget {
             artist: station.slogan,
             artUrl: station.imageAsset,
           );
+
+          // 👉 ABRIR LA PANTALLA DE PLAYER
+          Navigator.pushNamed(context, '/player');
         } else {
           // Alternar entre pausa y reproducción
           if (audio.state.playing) {
             await audio.pause();
           } else {
             await audio.resume();
+
+            // 👉 CUANDO SE REANUDA, TAMBIÉN ABRIR PANTALLA PLAYER
+            Navigator.pushNamed(context, '/player');
           }
         }
       },

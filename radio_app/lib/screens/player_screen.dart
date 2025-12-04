@@ -1,4 +1,5 @@
 // lib/screens/player_screen.dart
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -91,7 +92,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     super.dispose();
   }
 
-  // PANEL SOCIAL
+  // 🌟 PANEL SOCIAL CON BOTÓN X ABAJO
   Widget _socialPanel() {
     return Container(
       width: 60,
@@ -139,6 +140,20 @@ class _PlayerScreenState extends State<PlayerScreen>
               ),
             );
           }).toList(),
+          const SizedBox(height: 15),
+          // 🔥 BOTÓN X ABAJO
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                showMenu = false;
+              });
+            },
+            child: const CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.black,
+              child: Icon(Icons.close, color: Colors.red, size: 28),
+            ),
+          ),
         ],
       ),
     );
@@ -158,22 +173,21 @@ class _PlayerScreenState extends State<PlayerScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-
-        // ⬇️ ICONO PERSONALIZADO (down.png)
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: Image.asset(
-            'assets/icons/down.png',
-            width: 40,
-            height: 40,
-            color: Color(0xFFB2C100), // mismo lime del otro código
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Image.asset(
+              'assets/icons/down.png', // tu flecha hacia abajo
+              width: 32,
+              height: 32,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
-
         actions: [
           IconButton(
-            icon:
-                const Icon(Icons.more_vert, color: Color(0xFFB2C100), size: 32),
+            icon: const Icon(Icons.more_vert, color: Colors.yellow, size: 32),
             onPressed: () {
               setState(() {
                 showMenu = !showMenu;
@@ -191,12 +205,9 @@ class _PlayerScreenState extends State<PlayerScreen>
               child: Container(color: Colors.black.withOpacity(0.45)),
             ),
           ),
-
           Column(
             children: [
               const SizedBox(height: 10),
-
-              // DISCO GIRATORIO
               StreamBuilder<bool>(
                 stream: audio.playingStream,
                 builder: (context, snapshot) {
@@ -225,9 +236,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   );
                 },
               ),
-
               const SizedBox(height: 20),
-
               Text(
                 title,
                 style: const TextStyle(
@@ -236,9 +245,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               StreamBuilder<String>(
                 stream: audio.icyStream,
                 builder: (context, snapshot) {
@@ -252,10 +259,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   );
                 },
               ),
-
               const Spacer(),
-
-              // BOTÓN PLAY / PAUSE
               StreamBuilder<bool>(
                 stream: audio.playingStream,
                 builder: (context, snapshot) {
@@ -279,17 +283,14 @@ class _PlayerScreenState extends State<PlayerScreen>
                           ? Icons.pause_circle_filled
                           : Icons.play_circle_fill,
                       size: 90,
-                      color: Color(0xFFB2C100),
+                      color: Colors.yellow,
                     ),
                   );
                 },
               ),
-
               const SizedBox(height: 60),
             ],
           ),
-
-          // PANEL SOCIAL ANIMADO
           AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             right: showMenu ? 10 : -200,

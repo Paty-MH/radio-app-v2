@@ -33,7 +33,7 @@ class _MiniPlayerState extends State<MiniPlayer>
     final audio = context.watch<AudioProvider>();
 
     // 🚨 Si no hay estación cargada, no mostrar nada
-    if (audio.currentTitle == null) {
+    if (audio.currentTitle == null || audio.currentUrl == null) {
       return const SizedBox.shrink();
     }
 
@@ -43,6 +43,26 @@ class _MiniPlayerState extends State<MiniPlayer>
     } else {
       _rotationController.stop();
     }
+
+    // Detectar si la imagen es URL o asset
+    final bool isNetworkImage =
+        (audio.currentArt != null && audio.currentArt!.startsWith("http"));
+
+    final Widget stationImage = ClipOval(
+      child: isNetworkImage
+          ? Image.network(
+              audio.currentArt!,
+              width: 55,
+              height: 55,
+              fit: BoxFit.cover,
+            )
+          : Image.asset(
+              audio.currentArt ?? '',
+              width: 55,
+              height: 55,
+              fit: BoxFit.cover,
+            ),
+    );
 
     return Container(
       height: 85,
@@ -65,7 +85,7 @@ class _MiniPlayerState extends State<MiniPlayer>
           BoxShadow(
             color: Colors.black26,
             blurRadius: 6,
-            offset: const Offset(0, -2),
+            offset: Offset(0, -2),
           ),
         ],
       ),
@@ -74,14 +94,7 @@ class _MiniPlayerState extends State<MiniPlayer>
           // Imagen giratoria
           RotationTransition(
             turns: _rotationController,
-            child: ClipOval(
-              child: Image.asset(
-                audio.currentArt ?? '',
-                width: 55,
-                height: 55,
-                fit: BoxFit.cover,
-              ),
-            ),
+            child: stationImage,
           ),
 
           const SizedBox(width: 14),
@@ -128,12 +141,7 @@ class _MiniPlayerState extends State<MiniPlayer>
               if (audio.isPlaying) {
                 audio.pause();
               } else {
-                audio.playStation(
-                  url: audio.currentUrl!,
-                  title: audio.currentTitle!,
-                  artist: audio.currentArtist!,
-                  artUrl: audio.currentArt!,
-                );
+                audio.resume(); // 🔥 ahora reanuda correctamente
               }
             },
           ),

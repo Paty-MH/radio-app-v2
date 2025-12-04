@@ -8,11 +8,30 @@ class RadioAudioHandler extends BaseAudioHandler {
     _player.playbackEventStream.listen(_broadcastState);
   }
 
-  Future<void> playUrl(String url, String title, String artist) async {
+  Future<void> playUrl(
+      String url, String title, String artist, String artUrl) async {
+    // Evita errores si cambias rápido de estación
+    await _player.stop();
+
+    // Manejo de carátula (URL o asset)
+    final Uri artUri = artUrl.startsWith("http")
+        ? Uri.parse(artUrl)
+        : Uri.parse("asset:///$artUrl");
+
+    // Enviar MediaItem (para que funcione la notificación)
+    mediaItem.add(
+      MediaItem(
+        id: url,
+        title: title,
+        artist: artist,
+        album: artist,
+        artUri: artUri,
+      ),
+    );
+
+    // Configurar fuente y reproducir
     await _player.setUrl(url);
     await _player.play();
-
-    mediaItem.add(MediaItem(id: url, title: title, artist: artist));
   }
 
   Future<void> _broadcastState(PlaybackEvent event) async {
@@ -21,7 +40,7 @@ class RadioAudioHandler extends BaseAudioHandler {
     playbackState.add(
       playbackState.value.copyWith(
         playing: playing,
-        controls: [MediaControl.pause, MediaControl.play],
+        controls: playing ? [MediaControl.pause] : [MediaControl.play],
         processingState: const {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,

@@ -61,12 +61,29 @@ class AudioProvider extends ChangeNotifier {
     });
   }
 
+  // ───────────────────────────────────────────────
+  // 🔥 ACTIVACIÓN DEL SERVICIO DE AUDIO EN SEGUNDO PLANO
+  // ───────────────────────────────────────────────
   Future<void> _init() async {
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
     } catch (e) {
       debugPrint("Error inicializando audio session: $e");
+    }
+
+    // ---------------------------------------------------------
+    // 🔥 SOLUCIÓN AL PROBLEMA:
+    // ACTIVAMOS JUST_AUDIO_BACKGROUND ANTES DEL PRIMER PLAY
+    // ---------------------------------------------------------
+    try {
+      await _player.setAudioSource(
+        AudioSource.uri(Uri.parse("https://fake-init.com/empty.mp3")),
+      );
+      await _player.stop();
+      debugPrint("Background inicializado correctamente.");
+    } catch (e) {
+      debugPrint("Error inicializando background: $e");
     }
   }
 
@@ -139,4 +156,6 @@ class AudioProvider extends ChangeNotifier {
     _icyTitleSubject.close();
     super.dispose();
   }
+
+  void play() {}
 }
