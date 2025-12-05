@@ -1,4 +1,5 @@
 // lib/screens/home_screen.dart
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,6 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 130),
             children: [
               _bannerHeader(context),
-
               const SizedBox(height: 18),
 
               _titleSection('Nuestras', 'Estaciones'),
@@ -83,9 +83,10 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
+              /// 🔥 AHORA LLAMA A showProgramDialog 🔥
               ProgramCarousel(
                 programs: programs,
-                onTap: (p) => showProgramModal(context, p),
+                onTap: (p) => showProgramDialog(context, p),
               ),
 
               const SizedBox(height: 40),
@@ -177,149 +178,143 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // MODAL PROGRAMAS
-  void showProgramModal(BuildContext context, Program p) {
-    showModalBottomSheet(
+  // =======================================================
+  // 🔥 NUEVO DIALOGO COMPLETO — reemplaza al bottomSheet 🔥
+  // =======================================================
+  void showProgramDialog(BuildContext context, Program p) {
+    showGeneralDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.78,
-          minChildSize: 0.40,
-          maxChildSize: 0.95,
-          builder: (ctx, ctl) {
-            return Container(
-              margin: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
-              decoration: BoxDecoration(
-                color: Colors.white,
+      barrierDismissible: true,
+      barrierLabel: "Cerrar",
+      barrierColor: Colors.black.withOpacity(0.45),
+      transitionDuration: const Duration(milliseconds: 220),
+      pageBuilder: (_, __, ___) {
+        return Center(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Dialog(
+              insetPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.12),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: ListView(
-                  controller: ctl,
-                  children: [
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(20)),
-                          child: Image.asset(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Stack(
+                        children: [
+                          Image.asset(
                             p.imageAsset,
-                            height: 240,
+                            height: 200,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
-                        ),
-                        Positioned(
-                          top: 12,
-                          left: 12,
-                          child: GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(40),
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.title,
-                            style: GoogleFonts.poppins(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            p.description,
-                            style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              color: Colors.black87,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          Text(
-                            'Horarios de emisión',
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: p.schedules.map((s) {
-                              return Container(
-                                width: 150,
-                                padding: const EdgeInsets.all(12),
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: Colors.black12),
-                                  color: const Color(0xFFF8F8F8),
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(40),
                                 ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      s.day,
-                                      style: GoogleFonts.poppins(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      '${s.start} - ${s.end}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                  ],
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 22,
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 40),
                         ],
                       ),
-                    )
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              p.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              p.description,
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                            ),
+                            const SizedBox(height: 22),
+                            Text(
+                              'Horarios de emisión',
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: p.schedules.map((s) {
+                                return Container(
+                                  width: 150,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(color: Colors.black12),
+                                    color: const Color(0xFFF8F8F8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        s.day,
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${s.start} - ${s.end}',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 40),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
   }
 }
 
-// MINI PLAYER
+// ======================================
+// MINI PLAYER (SIN CAMBIOS)
+// ======================================
 class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
 
@@ -349,13 +344,10 @@ class _MiniPlayerState extends State<_MiniPlayer>
 
   void _updateRotation(bool playing) {
     if (playing) {
-      if (!_rotationController.isAnimating) {
-        _rotationController.repeat();
-      }
+      if (!_rotationController.isAnimating) _rotationController.repeat();
     } else {
-      if (_rotationController.isAnimating) {
+      if (_rotationController.isAnimating)
         _rotationController.stop(canceled: false);
-      }
     }
   }
 
