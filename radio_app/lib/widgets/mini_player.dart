@@ -32,16 +32,14 @@ class _MiniPlayerState extends State<MiniPlayer>
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
 
-    // 🚨 Si no hay estación cargada, no mostrar nada
-    if (audio.currentTitle == null || audio.currentUrl == null) {
-      return const SizedBox.shrink();
-    }
+    // Si no hay estación cargada
+    if (audio.currentUrl == null) return const SizedBox.shrink();
 
-    // 🔥 Controlar animación según play/pause
-    if (audio.isPlaying) {
-      _rotationController.repeat();
+    // Animación del disco según status
+    if (audio.status == AudioStatus.playing) {
+      if (!_rotationController.isAnimating) _rotationController.repeat();
     } else {
-      _rotationController.stop();
+      if (_rotationController.isAnimating) _rotationController.stop();
     }
 
     // Detectar si la imagen es URL o asset
@@ -64,16 +62,52 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
     );
 
+    // Mostrar botón según estado
+    Widget playPauseButton;
+    switch (audio.status) {
+      case AudioStatus.loading:
+        playPauseButton = const SizedBox(
+          width: 40,
+          height: 40,
+          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 3),
+        );
+        break;
+      case AudioStatus.playing:
+        playPauseButton = IconButton(
+          iconSize: 40,
+          icon: const Icon(Icons.pause_circle_filled, color: Colors.black),
+          onPressed: () => audio.pause(),
+        );
+        break;
+      case AudioStatus.paused:
+      case AudioStatus.stopped:
+        playPauseButton = IconButton(
+          iconSize: 40,
+          icon: const Icon(Icons.play_circle_fill, color: Colors.black),
+          onPressed: () => audio.resume(),
+        );
+        break;
+      case AudioStatus.error:
+      default:
+        playPauseButton = IconButton(
+          iconSize: 40,
+          icon: const Icon(Icons.error, color: Colors.red),
+          onPressed: () => audio.playStation(
+            url: audio.currentUrl!,
+            title: audio.currentTitle ?? '',
+            artist: audio.currentArtist ?? '',
+            artUrl: audio.currentArt ?? '',
+          ),
+        );
+    }
+
     return Container(
       height: 85,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFFF7D348),
-            Color(0xFFD4A224),
-          ],
+          colors: [Color(0xFFF7D348), Color(0xFFD4A224)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -82,24 +116,13 @@ class _MiniPlayerState extends State<MiniPlayer>
           topRight: Radius.circular(18),
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 6,
-            offset: Offset(0, -2),
-          ),
+          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, -2))
         ],
       ),
       child: Row(
         children: [
-          // Imagen giratoria
-          RotationTransition(
-            turns: _rotationController,
-            child: stationImage,
-          ),
-
+          RotationTransition(turns: _rotationController, child: stationImage),
           const SizedBox(width: 14),
-
-          // Nombre y slogan
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -108,43 +131,22 @@ class _MiniPlayerState extends State<MiniPlayer>
                 Text(
                   audio.currentTitle ?? '',
                   style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   audio.currentArtist ?? '',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 13, color: Colors.black87),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-
-          // Botón play/pause
-          IconButton(
-            iconSize: 40,
-            icon: Icon(
-              audio.isPlaying
-                  ? Icons.pause_circle_filled
-                  : Icons.play_circle_fill,
-              color: Colors.black,
-            ),
-            onPressed: () {
-              if (audio.isPlaying) {
-                audio.pause();
-              } else {
-                audio.resume(); // 🔥 ahora reanuda correctamente
-              }
-            },
-          ),
+          playPauseButton,
         ],
       ),
     );

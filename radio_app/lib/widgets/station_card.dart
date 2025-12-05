@@ -27,35 +27,11 @@ class StationCard extends StatelessWidget {
     final bool isCurrent = app.currentStationIndex != null &&
         stations[app.currentStationIndex!].name == station.name;
 
-    final bool isPlaying = isCurrent && audio.state.playing;
+    final bool isPlaying = isCurrent && audio.status == AudioStatus.playing;
 
     return GestureDetector(
       onLongPress: onLongPress,
-      onTap: () async {
-        if (!isCurrent) {
-          // Cambiar de estación y comenzar a reproducir
-          app.setCurrentStation(stations.indexOf(station));
-          await audio.playStation(
-            url: station.url,
-            title: station.name,
-            artist: station.slogan,
-            artUrl: station.imageAsset,
-          );
-
-          // 👉 ABRIR LA PANTALLA DE PLAYER
-          Navigator.pushNamed(context, '/player');
-        } else {
-          // Alternar entre pausa y reproducción
-          if (audio.state.playing) {
-            await audio.pause();
-          } else {
-            await audio.resume();
-
-            // 👉 CUANDO SE REANUDA, TAMBIÉN ABRIR PANTALLA PLAYER
-            Navigator.pushNamed(context, '/player');
-          }
-        }
-      },
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(14),
@@ -112,12 +88,49 @@ class StationCard extends StatelessWidget {
               ),
             ),
 
-            // BOTÓN PLAY / PAUSE
-            Icon(
-              isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
-              size: 34,
-              color: isPlaying ? Colors.red : Colors.black87,
-            ),
+            // BOTÓN PLAY / PAUSE / CARGA
+            Builder(builder: (_) {
+              if (isCurrent) {
+                switch (audio.status) {
+                  case AudioStatus.loading:
+                    return const SizedBox(
+                      width: 34,
+                      height: 34,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: Colors.red,
+                      ),
+                    );
+                  case AudioStatus.error:
+                    return const Icon(
+                      Icons.error,
+                      size: 34,
+                      color: Colors.red,
+                    );
+                  case AudioStatus.playing:
+                    return Icon(
+                      Icons.pause_circle_filled,
+                      size: 34,
+                      color: Colors.red,
+                    );
+                  case AudioStatus.paused:
+                  case AudioStatus.stopped:
+                  default:
+                    return Icon(
+                      Icons.play_circle_fill,
+                      size: 34,
+                      color: Colors.black87,
+                    );
+                }
+              } else {
+                // Otra estación no seleccionada
+                return const Icon(
+                  Icons.play_circle_fill,
+                  size: 34,
+                  color: Colors.black87,
+                );
+              }
+            }),
           ],
         ),
       ),

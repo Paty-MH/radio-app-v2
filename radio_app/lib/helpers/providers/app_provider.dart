@@ -23,12 +23,21 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Tema claro/oscuro (si lo usas)
+  /// Tema claro/oscuro
   bool _isDark = false;
   bool get isDark => _isDark;
 
   void toggleTheme() {
     _isDark = !_isDark;
+    notifyListeners();
+  }
+
+  /// Panel inferior abierto/cerrado
+  bool _isPanelOpen = false;
+  bool get isPanelOpen => _isPanelOpen;
+
+  void setPanelOpen(bool value) {
+    _isPanelOpen = value;
     notifyListeners();
   }
 }

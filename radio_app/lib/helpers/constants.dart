@@ -8,6 +8,12 @@ const stations = <Station>[
     url: 'https://stream.freepi.io:8012/live',
     slogan: 'La síncopa de nuestras latitudes',
     imageAsset: 'assets/images/station2.png',
+    socialLinks: {
+      "youtube": "",
+      "tiktok": "",
+      "whatsapp": "",
+      "web": "",
+    },
   ),
   Station(
     name: 'Radioactiva Tx',
@@ -15,6 +21,12 @@ const stations = <Station>[
     url: 'https://stream.laut.fm/lofi',
     slogan: '¡La Radio Alternativa!',
     imageAsset: 'assets/images/station1.png',
+    socialLinks: {
+      "youtube": "https://youtube.com/@radioactivatx",
+      "tiktok": "https://tiktok.com/@radioactivatx",
+      "whatsapp": "https://wa.me/5210000000000",
+      "web": "https://radioactivatx.com",
+    },
   ),
 ];
 

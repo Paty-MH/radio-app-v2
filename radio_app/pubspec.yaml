@@ -21,8 +21,8 @@ dependencies:
   just_audio: ^0.9.39
   audio_session: ^0.1.18
 
-  # Just Audio Background
-  just_audio_background: ^0.0.1-beta.17
+  # Just Audio Background (versión estable recomendada para Android 33+)
+  just_audio_background: ^0.0.1-beta.16
 
   # Streams
   rxdart: ^0.27.7
@@ -38,12 +38,17 @@ dependencies:
   shared_preferences: ^2.5.3
   font_awesome_flutter: ^10.12.0
 
+dev_dependencies:
+  flutter_launcher_icons: ^0.10.0
+
 flutter:
   uses-material-design: true
 
   assets:
-    # Carpeta de imágenes
     - assets/images/
-
-    # Carpeta de íconos (incluye todos los archivos dentro)
     - assets/icons/
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"

@@ -5,6 +5,8 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:rxdart/rxdart.dart';
 
+enum AudioStatus { stopped, loading, playing, paused, error }
+
 class AudioProvider extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
   final BehaviorSubject<String> _icyTitleSubject =
@@ -12,8 +14,6 @@ class AudioProvider extends ChangeNotifier {
 
   // STREAMS
   Stream<String> get icyStream => _icyTitleSubject.stream;
-  String get currentIcyTitle => _icyTitleSubject.value;
-
   Stream<PlayerState> get stateStream => _player.playerStateStream;
   Stream<bool> get playingStream => _player.playingStream;
   Stream<Duration> get positionStream => _player.positionStream;
@@ -21,35 +21,35 @@ class AudioProvider extends ChangeNotifier {
   PlayerState get state => _player.playerState;
   bool get isPlaying => _player.playing;
 
-  int _retryCount = 0;
-  final int _maxRetries = 3;
+  // Estado de carga
+  AudioStatus _status = AudioStatus.stopped;
+  AudioStatus get status => _status;
 
-  // 🔥 Datos de estación actual
+  // Datos de estación actual
   String? _currentTitle;
   String? _currentArtist;
   String? _currentArt;
   String? _currentUrl;
 
-  // Getters públicos
   String? get currentTitle => _currentTitle;
   String? get currentArtist => _currentArtist;
   String? get currentArt => _currentArt;
   String? get currentUrl => _currentUrl;
 
+  int _retryCount = 0;
+  final int _maxRetries = 3;
+
   AudioProvider() {
     _init();
 
-    // METADATA ICY
+    // ICY METADATA
     _player.icyMetadataStream.listen((metadata) {
       final icy = metadata?.info?.title ?? "";
       _icyTitleSubject.add(icy);
       notifyListeners();
     });
 
-    // Notificar cambios
-    _player.playerStateStream.listen((_) => notifyListeners());
-
-    // Reconexión automática
+    // Reconexión automática (sin mostrar loading al usuario)
     _player.playerStateStream.listen((state) async {
       if (!state.playing &&
           state.processingState == ProcessingState.idle &&
@@ -57,55 +57,63 @@ class AudioProvider extends ChangeNotifier {
         _retryCount++;
         debugPrint("Intentando reconectar... $_retryCount");
         await Future.delayed(const Duration(seconds: 2));
+        if (_currentUrl != null) {
+          try {
+            await playStation(
+              url: _currentUrl!,
+              title: _currentTitle ?? '',
+              artist: _currentArtist ?? '',
+              artUrl: _currentArt ?? '',
+              isReconnect: true, // evita spinner
+            );
+          } catch (_) {
+            _status = AudioStatus.error;
+            notifyListeners();
+          }
+        }
       }
     });
   }
 
-  // ───────────────────────────────────────────────
-  // 🔥 ACTIVACIÓN DEL SERVICIO DE AUDIO EN SEGUNDO PLANO
-  // ───────────────────────────────────────────────
   Future<void> _init() async {
     try {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
-    } catch (e) {
-      debugPrint("Error inicializando audio session: $e");
-    }
 
-    // ---------------------------------------------------------
-    // 🔥 SOLUCIÓN AL PROBLEMA:
-    // ACTIVAMOS JUST_AUDIO_BACKGROUND ANTES DEL PRIMER PLAY
-    // ---------------------------------------------------------
-    try {
+      // Inicializar just_audio_background
       await _player.setAudioSource(
         AudioSource.uri(Uri.parse("https://fake-init.com/empty.mp3")),
       );
       await _player.stop();
       debugPrint("Background inicializado correctamente.");
     } catch (e) {
-      debugPrint("Error inicializando background: $e");
+      debugPrint("Error inicializando audio: $e");
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔊 REPRODUCIR ESTACIÓN
-  // ───────────────────────────────────────────────
+  // Reproducir estación
   Future<void> playStation({
     required String url,
     required String title,
     required String artist,
     required String artUrl,
+    bool isReconnect = false,
   }) async {
     try {
-      _retryCount = 0;
+      // Evitar recargar misma estación
+      if (_currentUrl == url && _player.playing) return;
 
-      // 🔥 GUARDAR DATOS DE LA ESTACIÓN ACTUAL
+      _retryCount = 0;
       _currentTitle = title;
       _currentArtist = artist;
       _currentArt = artUrl;
       _currentUrl = url;
 
-      notifyListeners();
+      // Mostrar loading solo si NO es reconexión
+      if (!isReconnect) {
+        _status = AudioStatus.loading;
+        notifyListeners();
+      }
 
       final mediaItem = MediaItem(
         id: url,
@@ -115,38 +123,47 @@ class AudioProvider extends ChangeNotifier {
         artUri: Uri.parse("asset:///$artUrl"),
       );
 
-      debugPrint("⏳ Cargando stream: $url");
-
       await _player.stop();
-      await _player.setAudioSource(
-        AudioSource.uri(Uri.parse(url), tag: mediaItem),
-      );
 
-      debugPrint("🎧 Reproduciendo...");
-      await _player.play();
+      try {
+        await _player.setAudioSource(
+          AudioSource.uri(Uri.parse(url), tag: mediaItem),
+        );
+      } catch (e) {
+        debugPrint("❌ Error cargando audio: $e");
+        _status = AudioStatus.error;
+        notifyListeners();
+        return;
+      }
 
+      // Cambiamos estado a playing inmediatamente
+      _status = AudioStatus.playing;
       notifyListeners();
+
+      _player.play();
     } catch (e) {
       debugPrint("❌ Error reproduciendo estación: $e");
+      _status = AudioStatus.error;
       notifyListeners();
     }
   }
 
-  // ───────────────────────────────────────────────
   // CONTROLES
-  // ───────────────────────────────────────────────
   Future<void> pause() async {
     await _player.pause();
+    _status = AudioStatus.paused;
     notifyListeners();
   }
 
   Future<void> resume() async {
     await _player.play();
+    _status = AudioStatus.playing;
     notifyListeners();
   }
 
   Future<void> stop() async {
     await _player.stop();
+    _status = AudioStatus.stopped;
     notifyListeners();
   }
 
@@ -156,6 +173,4 @@ class AudioProvider extends ChangeNotifier {
     _icyTitleSubject.close();
     super.dispose();
   }
-
-  void play() {}
 }

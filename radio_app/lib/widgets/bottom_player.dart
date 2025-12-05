@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
+import '../helpers/providers/audio_provider.dart';
 
 class BottomPlayer extends StatefulWidget {
-  final AudioPlayer player;
-  final String title;
-  final String subtitle;
-  final String image; // 🔥 Agregamos imagen del disco
-
-  const BottomPlayer({
-    super.key,
-    required this.player,
-    required this.title,
-    required this.subtitle,
-    required this.image,
-  });
+  const BottomPlayer({super.key});
 
   @override
   State<BottomPlayer> createState() => _BottomPlayerState();
@@ -31,15 +21,6 @@ class _BottomPlayerState extends State<BottomPlayer>
       vsync: this,
       duration: const Duration(seconds: 6),
     );
-
-    // 🔥 Escucha cambios del player para mover o detener la animación
-    widget.player.playerStateStream.listen((state) {
-      if (state.playing) {
-        _rotationController.repeat();
-      } else {
-        _rotationController.stop();
-      }
-    });
   }
 
   @override
@@ -50,41 +31,68 @@ class _BottomPlayerState extends State<BottomPlayer>
 
   @override
   Widget build(BuildContext context) {
+    final audio = context.watch<AudioProvider>();
+
+    // ⛔ Si no hay estación cargada, no mostrar nada
+    if (audio.currentTitle == null || audio.currentUrl == null) {
+      return const SizedBox.shrink();
+    }
+
+    // 🔥 Control de animación según esté sonando o pausado
+    if (audio.isPlaying) {
+      _rotationController.repeat();
+    } else {
+      _rotationController.stop();
+    }
+
     return Material(
-      elevation: 10,
+      elevation: 12,
       child: Container(
+        height: 70,
         color: Colors.black87,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            // 🎵 DISCO GIRANDO
+            // 🎵 IMAGEN GIRANDO
             RotationTransition(
               turns: _rotationController,
               child: ClipOval(
-                child: Image.asset(
-                  widget.image,
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
+                child: audio.currentArt != null &&
+                        audio.currentArt!.startsWith("http")
+                    ? Image.network(
+                        audio.currentArt!,
+                        width: 45,
+                        height: 45,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.asset(
+                        audio.currentArt ?? '',
+                        width: 45,
+                        height: 45,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
 
             const SizedBox(width: 12),
 
+            // 📻 TÍTULO Y ARTISTA
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.title,
+                    audio.currentTitle ?? '',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    widget.subtitle,
+                    audio.currentArtist ?? '',
                     style: const TextStyle(color: Colors.white70),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -93,23 +101,21 @@ class _BottomPlayerState extends State<BottomPlayer>
               ),
             ),
 
-            // ▶ BOTÓN PLAY / PAUSE
-            StreamBuilder<PlayerState>(
-              stream: widget.player.playerStateStream,
-              builder: (context, snapshot) {
-                final isPlaying = snapshot.data?.playing ?? false;
-
-                return IconButton(
-                  icon: Icon(
-                    isPlaying
-                        ? Icons.pause_circle_filled
-                        : Icons.play_circle_fill,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                  onPressed: () =>
-                      isPlaying ? widget.player.pause() : widget.player.play(),
-                );
+            // ▶ BOTÓN PLAY/PAUSE
+            IconButton(
+              iconSize: 38,
+              icon: Icon(
+                audio.isPlaying
+                    ? Icons.pause_circle_filled
+                    : Icons.play_circle_fill,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                if (audio.isPlaying) {
+                  audio.pause();
+                } else {
+                  audio.resume(); // 🎯 Reanuda sin reiniciar
+                }
               },
             ),
           ],
