@@ -1,5 +1,3 @@
-// lib/screens/player_screen.dart
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -30,22 +28,19 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   bool showSocialBar = false;
 
-  // --------------------------------------
-  // ÍCONOS DE REDES (compartir es ICONO REAL)
-  // --------------------------------------
   final List<Map<String, dynamic>> linkItems = [
     {
       'type': 'share',
-      'icon': Icons.share, // ← ICONO REAL
+      'icon': Icons.share,
     },
     {
       'label': 'Facebook',
-      'asset': 'assets/icons/facebook_1.png',
+      'asset': 'assets/icons/facebook.png',
       'url': 'https://www.facebook.com/radioactivatx89.9'
     },
     {
       'label': 'Web',
-      'asset': 'assets/icons/web.jpg',
+      'asset': 'assets/icons/web.png',
       'url': 'https://www.radioactivatx.org/'
     },
     {
@@ -60,7 +55,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     },
     {
       'label': 'Twitter',
-      'asset': 'assets/icons/x.png',
+      'asset': 'assets/icons/x.wepb',
       'url': 'https://twitter.com/RadioactivaTx'
     },
     {
@@ -100,9 +95,9 @@ class _PlayerScreenState extends State<PlayerScreen>
     super.dispose();
   }
 
-  // -----------------------------------------
-  // BARRA FLOTANTE LATERAL (íconos redondos)
-  // -----------------------------------------
+  // ---------------------------------------------------
+  // BARRA SOCIAL (AHORA ICONOS CUADRADOS REDONDEADOS)
+  // ---------------------------------------------------
   Widget buildSocialBar() {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
@@ -143,15 +138,16 @@ class _PlayerScreenState extends State<PlayerScreen>
                   child: Container(
                     width: 48,
                     height: 48,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
+                    decoration: BoxDecoration(
                       color: Colors.white,
+                      borderRadius: BorderRadius.circular(12), // ⬅ CUADRADO
                     ),
                     child: Center(
                       child: isShare
                           ? const Icon(Icons.share,
                               color: Colors.black87, size: 28)
-                          : ClipOval(
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
                               child: Image.asset(
                                 item['asset'],
                                 width: 40,
@@ -167,7 +163,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 
             const SizedBox(height: 8),
 
-            // BOTÓN CERRAR (redondo)
+            // BOTÓN CERRAR — AHORA CUADRADO
             GestureDetector(
               onTap: () => setState(() => showSocialBar = false),
               child: Container(
@@ -175,9 +171,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                 height: 32,
                 decoration: BoxDecoration(
                   color: Colors.yellow,
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.close, size: 10, color: Colors.black),
+                child: const Icon(Icons.close, size: 24, color: Colors.black),
               ),
             ),
           ],
@@ -186,9 +182,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  // -----------------------------------------
-  // UI PRINCIPAL
-  // -----------------------------------------
   @override
   Widget build(BuildContext context) {
     final audio = Provider.of<AudioProvider>(context);
@@ -209,22 +202,16 @@ class _PlayerScreenState extends State<PlayerScreen>
       body: Stack(
         children: [
           Positioned.fill(child: Image.asset(art, fit: BoxFit.cover)),
-
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(color: Colors.black.withOpacity(0.55)),
             ),
           ),
-
           buildSocialBar(),
-
-          // CONTENIDO
           Column(
             children: [
               const SizedBox(height: 30),
-
-              // Flecha abajo en la ESQUINA IZQUIERDA
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Align(
@@ -238,10 +225,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // DISCO GIRATORIO
               Center(
                 child: RotationTransition(
                   turns: _rotationController,
@@ -254,9 +238,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
               Text(
                 title,
                 style: const TextStyle(
@@ -265,9 +247,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 10),
-
               StreamBuilder<String>(
                 stream: audio.icyStream,
                 builder: (context, snapshot) {
@@ -284,10 +264,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   );
                 },
               ),
-
               const Spacer(),
-
-              // PLAY / PAUSE
               Builder(builder: (context) {
                 if (audio.status == AudioStatus.loading) {
                   return const CircularProgressIndicator(
@@ -330,12 +307,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   );
                 }
               }),
-
               const SizedBox(height: 50),
             ],
           ),
-
-          // ● BOTÓN MORE (3 puntitos)
           Positioned(
             top: 45,
             right: 20,
