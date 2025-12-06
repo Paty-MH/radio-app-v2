@@ -31,7 +31,20 @@ class StationCard extends StatelessWidget {
 
     return GestureDetector(
       onLongPress: onLongPress,
-      onTap: onTap,
+      onTap: () async {
+        // 🔥 SOLO AGREGO ESTA PARTE PARA QUE PAUSE / REANUDE
+        if (isCurrent) {
+          if (audio.status == AudioStatus.playing) {
+            await audio.pause();
+          } else {
+            await audio.resume();
+          }
+          return;
+        }
+
+        // Si es otra estación → comportamiento ORIGINAL
+        onTap();
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(14),
@@ -88,7 +101,7 @@ class StationCard extends StatelessWidget {
               ),
             ),
 
-            // BOTÓN PLAY / PAUSE / CARGA
+            // PLAY / PAUSE / LOADING
             Builder(builder: (_) {
               if (isCurrent) {
                 switch (audio.status) {
@@ -101,29 +114,31 @@ class StationCard extends StatelessWidget {
                         color: Colors.red,
                       ),
                     );
+
                   case AudioStatus.error:
                     return const Icon(
                       Icons.error,
                       size: 34,
                       color: Colors.red,
                     );
+
                   case AudioStatus.playing:
-                    return Icon(
+                    return const Icon(
                       Icons.pause_circle_filled,
                       size: 34,
                       color: Colors.red,
                     );
+
                   case AudioStatus.paused:
                   case AudioStatus.stopped:
                   default:
-                    return Icon(
+                    return const Icon(
                       Icons.play_circle_fill,
                       size: 34,
                       color: Colors.black87,
                     );
                 }
               } else {
-                // Otra estación no seleccionada
                 return const Icon(
                   Icons.play_circle_fill,
                   size: 34,

@@ -25,87 +25,99 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
-      body: Stack(
+      body: Column(
         children: [
-          ListView(
-            padding: const EdgeInsets.only(bottom: 130),
-            children: [
-              _bannerHeader(context),
-              const SizedBox(height: 18),
+          // HEADER FIJO (NO SE ESCONDE)
+          _bannerHeader(context),
 
-              _titleSection('Nuestras', 'Estaciones'),
-              const SizedBox(height: 10),
-
-              // LISTA DE ESTACIONES
-              ...List.generate(stations.length, (i) {
-                final s = stations[i];
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: StationCard(
-                    station: s,
-                    onTap: () {
-                      context.read<AppProvider>().setCurrentStation(i);
-                      context.read<AudioProvider>().playStation(
-                            url: s.url,
-                            title: s.name,
-                            artist: s.slogan,
-                            artUrl: s.imageAsset,
-                          );
-                    },
-                    onLongPress: () {},
-                  ),
-                );
-              }),
-
-              const SizedBox(height: 14),
-
-              // PROGRAMAS + BOTÓN VER TODOS
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Expanded(
+            child: Stack(
+              children: [
+                ListView(
+                  padding: const EdgeInsets.only(bottom: 130),
                   children: [
-                    _titleSection('Nuestros', 'Programas'),
-                    TextButton(
-                      onPressed: () =>
-                          Navigator.pushNamed(context, '/programs'),
-                      child: Text(
-                        'Ver Todos',
-                        style: GoogleFonts.poppins(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 11,
+                    const SizedBox(height: 18),
+
+                    _titleSection('Nuestras', 'Estaciones'),
+                    const SizedBox(height: 10),
+
+                    // LISTA DE ESTACIONES
+                    ...List.generate(stations.length, (i) {
+                      final s = stations[i];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: StationCard(
+                          station: s,
+                          onTap: () {
+                            // actualizar estación actual en AppProvider
+                            context.read<AppProvider>().setCurrentStation(i);
+                            // reproducir en AudioProvider
+                            context.read<AudioProvider>().playStation(
+                                  url: s.url,
+                                  title: s.name,
+                                  artist: s.slogan,
+                                  artUrl: s.imageAsset,
+                                );
+                          },
+                          onLongPress: () {},
                         ),
+                      );
+                    }),
+
+                    const SizedBox(height: 14),
+
+                    // PROGRAMAS
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _titleSection('Nuestros', 'Programas'),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pushNamed(context, '/programs'),
+                            child: Text(
+                              'Ver Todos',
+                              style: GoogleFonts.poppins(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
+                    const SizedBox(height: 8),
+
+                    ProgramCarousel(
+                      programs: programs,
+                      onTap: (p) => showProgramDialog(context, p),
+                    ),
+
+                    const SizedBox(height: 40),
+                    const SocialIconsSection(),
+                    const SizedBox(height: 25),
+                    const SizedBox(height: 430),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // CARRUSEL DE PROGRAMAS
-              ProgramCarousel(
-                programs: programs,
-                onTap: (p) => showProgramDialog(context, p),
-              ),
-
-              const SizedBox(height: 40),
-              const SocialIconsSection(),
-              const SizedBox(height: 25),
-              const SizedBox(height: 430),
-            ],
-          ),
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: _MiniPlayer(),
+                const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: _MiniPlayer(),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
+  // =======================================================
+  // HEADER EXACTO — FIJO Y SIN MOVERSE
+  // =======================================================
   Widget _bannerHeader(BuildContext context) {
     return Container(
       height: 200,
@@ -128,6 +140,8 @@ class HomeScreen extends StatelessWidget {
                 builder: (ctx) {
                   return IconButton(
                     icon: const Icon(Icons.menu, color: Colors.black),
+                    // usar Scaffold.of(ctx) puede mostrar un warning en nuevas versiones;
+                    // si tu proyecto usa ScaffoldMessenger, considera cambiarlo.
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   );
                 },
@@ -177,25 +191,30 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // =======================================================
+  // DIALOGO PROGRAMAS (CLONADO)
+  // =======================================================
   void showProgramDialog(BuildContext context, Program p) {
+    final String today = _getToday();
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "Cerrar",
       barrierColor: Colors.black.withOpacity(0.45),
-      transitionDuration: const Duration(milliseconds: 200),
+      transitionDuration: const Duration(milliseconds: 160),
       pageBuilder: (_, __, ___) {
         return Center(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
             child: Dialog(
               insetPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(22),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(22),
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
@@ -203,7 +222,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Image.asset(
                             p.imageAsset,
-                            height: 100,
+                            height: 230,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -213,23 +232,41 @@ class HomeScreen extends StatelessWidget {
                             child: GestureDetector(
                               onTap: () => Navigator.pop(context),
                               child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(40),
+                                width: 38,
+                                height: 38,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black87,
+                                  shape: BoxShape.circle,
                                 ),
-                                padding: const EdgeInsets.all(8),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.white,
-                                  size: 22,
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 25),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: GestureDetector(
+                              onTap: () {
+                                // aquí podrías implementar fullscreen si quieres
+                              },
+                              child: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black87,
+                                  shape: BoxShape.circle,
                                 ),
+                                child: const Icon(Icons.fullscreen,
+                                    color: Colors.white, size: 23),
                               ),
                             ),
                           ),
                         ],
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 22),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -249,26 +286,36 @@ class HomeScreen extends StatelessWidget {
                                 height: 1.4,
                               ),
                             ),
-                            const SizedBox(height: 15),
+                            const SizedBox(height: 25),
                             Text(
                               'Horarios de emisión',
                               style: GoogleFonts.poppins(
-                                fontSize: 10,
+                                fontSize: 12,
+                                color: Colors.black87,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: 15),
+                            const SizedBox(height: 10),
                             Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
+                              spacing: 10,
+                              runSpacing: 10,
                               children: p.schedules.map((s) {
+                                final isToday =
+                                    s.day.toLowerCase() == today.toLowerCase();
+
                                 return Container(
-                                  width: 150,
-                                  padding: const EdgeInsets.all(12),
+                                  width: 110,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 14, horizontal: 14),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: Colors.black12),
-                                    color: const Color(0xFFF8F8F8),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isToday
+                                          ? Colors.amber
+                                          : Colors.black12,
+                                    ),
+                                    color:
+                                        isToday ? Colors.amber : Colors.white,
                                   ),
                                   child: Column(
                                     children: [
@@ -276,7 +323,7 @@ class HomeScreen extends StatelessWidget {
                                         s.day,
                                         style: GoogleFonts.poppins(
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 15,
+                                          fontSize: 16,
                                         ),
                                       ),
                                       const SizedBox(height: 6),
@@ -292,7 +339,7 @@ class HomeScreen extends StatelessWidget {
                                 );
                               }).toList(),
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 35),
                           ],
                         ),
                       )
@@ -308,9 +355,26 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ======================================
-// MINI PLAYER
-// ======================================
+// ==============================================================
+//   FUNCIÓN PARA DETECTAR DÍA ACTUAL (Lunes, Martes, etc.)
+// ==============================================================
+String _getToday() {
+  final days = {
+    1: "Lunes",
+    2: "Martes",
+    3: "Miércoles",
+    4: "Jueves",
+    5: "Viernes",
+    6: "Sábado",
+    7: "Domingo",
+  };
+  return days[DateTime.now().weekday]!;
+}
+
+// =======================================================
+// MINI PLAYER (CON PAUSA QUE SÍ FUNCIONA)
+// =======================================================
+
 class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
 
@@ -342,8 +406,9 @@ class _MiniPlayerState extends State<_MiniPlayer>
     if (playing) {
       if (!_rotationController.isAnimating) _rotationController.repeat();
     } else {
-      if (_rotationController.isAnimating)
+      if (_rotationController.isAnimating) {
         _rotationController.stop(canceled: false);
+      }
     }
   }
 
@@ -368,8 +433,10 @@ class _MiniPlayerState extends State<_MiniPlayer>
     final audio = context.watch<AudioProvider>();
     final app = context.watch<AppProvider>();
 
-    final int idx = app.currentStationIndex;
-    if (idx < 0 || idx >= stations.length) return const SizedBox.shrink();
+    final idx = app.currentStationIndex;
+    if (idx == null || idx < 0 || idx >= stations.length)
+      return const SizedBox.shrink();
+
     final s = stations[idx];
 
     return GestureDetector(
@@ -411,13 +478,6 @@ class _MiniPlayerState extends State<_MiniPlayer>
                     height: 54,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
                       image: DecorationImage(
                         image: AssetImage(s.imageAsset),
                         fit: BoxFit.cover,
@@ -447,8 +507,9 @@ class _MiniPlayerState extends State<_MiniPlayer>
                   StreamBuilder<String>(
                     stream: audio.icyStream,
                     builder: (context, snap) {
-                      final t = snap.data ?? '';
+                      final t = snap.data ?? "";
                       final subtitle = t.isNotEmpty ? t : s.slogan;
+
                       return Text(
                         subtitle,
                         style: GoogleFonts.poppins(

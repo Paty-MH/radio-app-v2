@@ -177,7 +177,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   color: Colors.yellow,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.close, size: 24, color: Colors.black),
+                child: const Icon(Icons.close, size: 10, color: Colors.black),
               ),
             ),
           ],
