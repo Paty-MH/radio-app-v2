@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:radio_app/models/station_model.dart';
 
 import '../helpers/constants.dart';
 import '../helpers/providers/audio_provider.dart';
@@ -15,6 +16,7 @@ import '../models/program_model.dart';
 
 import '../widgets/app_drawer.dart';
 import '../widgets/social_icons.dart';
+import 'player_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -58,7 +60,7 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 14),
 
-              // PROGRAMAS
+              // PROGRAMAS + BOTÓN VER TODOS
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
@@ -83,14 +85,13 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              /// 🔥 AHORA LLAMA A showProgramDialog 🔥
+              // CARRUSEL DE PROGRAMAS
               ProgramCarousel(
                 programs: programs,
                 onTap: (p) => showProgramDialog(context, p),
               ),
 
               const SizedBox(height: 40),
-
               const SocialIconsSection(),
               const SizedBox(height: 25),
               const SizedBox(height: 430),
@@ -105,7 +106,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // HEADER
   Widget _bannerHeader(BuildContext context) {
     return Container(
       height: 200,
@@ -145,7 +145,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // TITULOS
   Widget _titleSection(String t1, String t2) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -166,7 +165,7 @@ class HomeScreen extends StatelessWidget {
                 TextSpan(
                   text: t2,
                   style: GoogleFonts.poppins(
-                    color: Color(0xFFFFC400),
+                    color: const Color(0xFFFFC400),
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -178,16 +177,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // =======================================================
-  // 🔥 NUEVO DIALOGO COMPLETO — reemplaza al bottomSheet 🔥
-  // =======================================================
   void showProgramDialog(BuildContext context, Program p) {
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: "Cerrar",
       barrierColor: Colors.black.withOpacity(0.45),
-      transitionDuration: const Duration(milliseconds: 220),
+      transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (_, __, ___) {
         return Center(
           child: BackdropFilter(
@@ -207,7 +203,7 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Image.asset(
                             p.imageAsset,
-                            height: 200,
+                            height: 100,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -253,11 +249,11 @@ class HomeScreen extends StatelessWidget {
                                 height: 1.4,
                               ),
                             ),
-                            const SizedBox(height: 22),
+                            const SizedBox(height: 15),
                             Text(
                               'Horarios de emisión',
                               style: GoogleFonts.poppins(
-                                fontSize: 18,
+                                fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -313,7 +309,7 @@ class HomeScreen extends StatelessWidget {
 }
 
 // ======================================
-// MINI PLAYER (SIN CAMBIOS)
+// MINI PLAYER
 // ======================================
 class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
@@ -351,6 +347,22 @@ class _MiniPlayerState extends State<_MiniPlayer>
     }
   }
 
+  void _openPlayerSheet(BuildContext context, Station s) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SizedBox(
+        height: MediaQuery.of(context).size.height * 0.9,
+        child: PlayerScreen(
+          streamUrl: s.url,
+          artUrl: s.imageAsset,
+          stationName: s.name,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
@@ -361,7 +373,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
     final s = stations[idx];
 
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/player'),
+      onTap: () => _openPlayerSheet(context, s),
       child: Container(
         margin: const EdgeInsets.all(12),
         padding: const EdgeInsets.symmetric(horizontal: 12),

@@ -18,7 +18,7 @@ const stations = <Station>[
   Station(
     name: 'Radioactiva Tx',
     acronym: 'RTX',
-    url: 'https://stream.laut.fm/lofi',
+    url: 'https://stream.freepi.io/8010/stream',
     slogan: '¡La Radio Alternativa!',
     imageAsset: 'assets/images/station1.png',
     socialLinks: {

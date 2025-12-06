@@ -1,8 +1,11 @@
+// lib/screens/player_screen.dart
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../helpers/providers/audio_provider.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -25,42 +28,50 @@ class _PlayerScreenState extends State<PlayerScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
 
-  final List<Map<String, dynamic>> linkItems = const [
+  bool showSocialBar = false;
+
+  // --------------------------------------
+  // ÍCONOS DE REDES (compartir es ICONO REAL)
+  // --------------------------------------
+  final List<Map<String, dynamic>> linkItems = [
+    {
+      'type': 'share',
+      'icon': Icons.share, // ← ICONO REAL
+    },
     {
       'label': 'Facebook',
       'asset': 'assets/icons/facebook_1.png',
-      'url':
-          'https://www.facebook.com/radioactivatx89.9?wtsid=rdr_01btUDnQhVaGthwGL&from_intent_redirect=1',
+      'url': 'https://www.facebook.com/radioactivatx89.9'
     },
     {
       'label': 'Web',
       'asset': 'assets/icons/web.jpg',
-      'url': 'https://www.radioactivatx.org/',
+      'url': 'https://www.radioactivatx.org/'
+    },
+    {
+      'label': 'WhatsApp',
+      'asset': 'assets/icons/Telefono.png',
+      'url': 'tel:+524141199003'
     },
     {
       'label': 'Instagram',
       'asset': 'assets/icons/instagram_1.jpg',
-      'url': 'https://www.instagram.com/radioactiva.tx?igsh=M2piYzc1eGNiY29v',
+      'url': 'https://www.instagram.com/radioactiva.tx'
     },
     {
-      'label': 'Twitter (X)',
+      'label': 'Twitter',
       'asset': 'assets/icons/x.png',
-      'url': 'https://twitter.com/RadioactivaTx',
+      'url': 'https://twitter.com/RadioactivaTx'
     },
     {
       'label': 'TikTok',
       'asset': 'assets/icons/tiktok.png',
-      'url': 'https://www.tiktok.com/@radioactiva.tx?_r=1&_t=ZS-91jAkaMrlyP',
+      'url': 'https://www.tiktok.com/@radioactiva.tx'
     },
     {
       'label': 'YouTube',
       'asset': 'assets/icons/youtube.png',
-      'url': 'https://youtube.com/@radioactivatx?si=AZwNbDJzsPoLlxDB',
-    },
-    {
-      'label': 'Llamar',
-      'asset': 'assets/icons/Telefono.png',
-      'url': 'tel:+524141199003',
+      'url': 'https://youtube.com/@radioactivatx'
     },
   ];
 
@@ -73,8 +84,8 @@ class _PlayerScreenState extends State<PlayerScreen>
       duration: const Duration(seconds: 12),
     );
 
-    // Reproducir la estación al abrir el PlayerScreen
     final audio = Provider.of<AudioProvider>(context, listen: false);
+
     audio.playStation(
       url: widget.streamUrl,
       title: widget.stationName,
@@ -89,76 +100,95 @@ class _PlayerScreenState extends State<PlayerScreen>
     super.dispose();
   }
 
-  void _showSocialPanel() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.black.withOpacity(0.9),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Redes Sociales",
-                style: TextStyle(
-                    color: Colors.yellow,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: linkItems.map((item) {
-                  return GestureDetector(
-                    onTap: () async {
-                      if (item['label'] == 'Compartir') {
-                        Share.share(
-                          "📻 Escucha *${widget.stationName}* en vivo:\n${widget.streamUrl}",
-                          subject: "Radio en Vivo",
-                        );
-                      } else {
-                        final uri = Uri.parse(item['url']);
-                        await launchUrl(uri,
-                            mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 28,
-                          backgroundColor: Colors.black,
-                          child: ClipOval(
-                            child: Image.asset(
-                              item['asset'],
-                              width: 36,
-                              height: 36,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(item['label'],
-                            style: const TextStyle(
-                                color: Colors.white70, fontSize: 12)),
-                      ],
+  // -----------------------------------------
+  // BARRA FLOTANTE LATERAL (íconos redondos)
+  // -----------------------------------------
+  Widget buildSocialBar() {
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 200),
+      right: showSocialBar ? 15 : -200,
+      top: 260,
+      child: Container(
+        width: 78,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.35),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            ...linkItems.map((item) {
+              final bool isShare = item['type'] == 'share';
+
+              return GestureDetector(
+                onTap: () async {
+                  if (isShare) {
+                    await Share.share(
+                      "🎧 Escucha ${widget.stationName}\n${widget.streamUrl}",
+                    );
+                  } else {
+                    final uri = Uri.parse(item['url']);
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
                     ),
-                  );
-                }).toList(),
+                    child: Center(
+                      child: isShare
+                          ? const Icon(Icons.share,
+                              color: Colors.black87, size: 28)
+                          : ClipOval(
+                              child: Image.asset(
+                                item['asset'],
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+
+            const SizedBox(height: 8),
+
+            // BOTÓN CERRAR (redondo)
+            GestureDetector(
+              onTap: () => setState(() => showSocialBar = false),
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.yellow,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, size: 24, color: Colors.black),
               ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
+  // -----------------------------------------
+  // UI PRINCIPAL
+  // -----------------------------------------
   @override
   Widget build(BuildContext context) {
     final audio = Provider.of<AudioProvider>(context);
@@ -166,7 +196,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     final art = widget.artUrl;
     final title = widget.stationName;
 
-    // Controla animación de disco
     if (audio.status == AudioStatus.playing &&
         !_rotationController.isAnimating) {
       _rotationController.repeat();
@@ -177,53 +206,57 @@ class _PlayerScreenState extends State<PlayerScreen>
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              'assets/icons/down.png',
-              width: 32,
-              height: 32,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.yellow, size: 32),
-            onPressed: _showSocialPanel,
-          )
-        ],
-      ),
       body: Stack(
         children: [
           Positioned.fill(child: Image.asset(art, fit: BoxFit.cover)),
+
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: Container(color: Colors.black.withOpacity(0.45)),
+              child: Container(color: Colors.black.withOpacity(0.55)),
             ),
           ),
+
+          buildSocialBar(),
+
+          // CONTENIDO
           Column(
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 30),
+
+              // Flecha abajo en la ESQUINA IZQUIERDA
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Image.asset(
+                      'assets/icons/down.png',
+                      width: 45,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // DISCO GIRATORIO
               Center(
                 child: RotationTransition(
                   turns: _rotationController,
                   child: ClipOval(
                     child: Container(
-                      width: 240,
-                      height: 240,
+                      width: 230,
+                      height: 230,
                       child: Image.asset(art, fit: BoxFit.cover),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 30),
+
               Text(
                 title,
                 style: const TextStyle(
@@ -232,7 +265,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 10),
+
               StreamBuilder<String>(
                 stream: audio.icyStream,
                 builder: (context, snapshot) {
@@ -241,6 +276,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     icy.isNotEmpty
                         ? icy
                         : (audio.currentArtist ?? "Escuchando estación"),
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
@@ -248,8 +284,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                   );
                 },
               ),
+
               const Spacer(),
-              // Botón Play / Pause / Loading / Error
+
+              // PLAY / PAUSE
               Builder(builder: (context) {
                 if (audio.status == AudioStatus.loading) {
                   return const CircularProgressIndicator(
@@ -286,14 +324,29 @@ class _PlayerScreenState extends State<PlayerScreen>
                       isPlaying
                           ? Icons.pause_circle_filled
                           : Icons.play_circle_fill,
-                      size: 90,
+                      size: 95,
                       color: Colors.yellow,
                     ),
                   );
                 }
               }),
-              const SizedBox(height: 60),
+
+              const SizedBox(height: 50),
             ],
+          ),
+
+          // ● BOTÓN MORE (3 puntitos)
+          Positioned(
+            top: 45,
+            right: 20,
+            child: GestureDetector(
+              onTap: () => setState(() => showSocialBar = true),
+              child: const Icon(
+                Icons.more_vert,
+                color: Colors.yellow,
+                size: 34,
+              ),
+            ),
           ),
         ],
       ),

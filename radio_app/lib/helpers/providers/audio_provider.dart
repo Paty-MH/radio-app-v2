@@ -49,27 +49,26 @@ class AudioProvider extends ChangeNotifier {
       notifyListeners();
     });
 
-    // Reconexión automática (sin mostrar loading al usuario)
+    // Reconexión automática
     _player.playerStateStream.listen((state) async {
       if (!state.playing &&
           state.processingState == ProcessingState.idle &&
-          _retryCount < _maxRetries) {
+          _retryCount < _maxRetries &&
+          _currentUrl != null) {
         _retryCount++;
         debugPrint("Intentando reconectar... $_retryCount");
         await Future.delayed(const Duration(seconds: 2));
-        if (_currentUrl != null) {
-          try {
-            await playStation(
-              url: _currentUrl!,
-              title: _currentTitle ?? '',
-              artist: _currentArtist ?? '',
-              artUrl: _currentArt ?? '',
-              isReconnect: true, // evita spinner
-            );
-          } catch (_) {
-            _status = AudioStatus.error;
-            notifyListeners();
-          }
+        try {
+          await playStation(
+            url: _currentUrl!,
+            title: _currentTitle ?? '',
+            artist: _currentArtist ?? '',
+            artUrl: _currentArt ?? '',
+            isReconnect: true,
+          );
+        } catch (_) {
+          _status = AudioStatus.error;
+          notifyListeners();
         }
       }
     });
@@ -80,7 +79,6 @@ class AudioProvider extends ChangeNotifier {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
 
-      // Inicializar just_audio_background
       await _player.setAudioSource(
         AudioSource.uri(Uri.parse("https://fake-init.com/empty.mp3")),
       );
@@ -100,8 +98,8 @@ class AudioProvider extends ChangeNotifier {
     bool isReconnect = false,
   }) async {
     try {
-      // Evitar recargar misma estación
-      if (_currentUrl == url && _player.playing) return;
+      // Permitir recarga si no está realmente reproduciendo
+      if (_currentUrl == url && _status == AudioStatus.playing) return;
 
       _retryCount = 0;
       _currentTitle = title;
@@ -109,18 +107,17 @@ class AudioProvider extends ChangeNotifier {
       _currentArt = artUrl;
       _currentUrl = url;
 
-      // Mostrar loading solo si NO es reconexión
-      if (!isReconnect) {
-        _status = AudioStatus.loading;
-        notifyListeners();
-      }
+      _status = isReconnect ? _status : AudioStatus.loading;
+      notifyListeners();
 
       final mediaItem = MediaItem(
         id: url,
         album: artist,
         title: title,
         artist: artist,
-        artUri: Uri.parse("asset:///$artUrl"),
+        artUri: artUrl.startsWith("http")
+            ? Uri.parse(artUrl)
+            : Uri.parse("asset:///$artUrl"),
       );
 
       await _player.stop();
@@ -136,10 +133,8 @@ class AudioProvider extends ChangeNotifier {
         return;
       }
 
-      // Cambiamos estado a playing inmediatamente
       _status = AudioStatus.playing;
       notifyListeners();
-
       _player.play();
     } catch (e) {
       debugPrint("❌ Error reproduciendo estación: $e");

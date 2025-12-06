@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/program_model.dart';
+import '../screens/home_screen.dart'; // ← IMPORTA donde está showProgramDialog
 
 class ProgramCard extends StatelessWidget {
   final Program program;
-  final VoidCallback onTap;
 
   const ProgramCard({
     super.key,
     required this.program,
-    required this.onTap,
+    required Null Function() onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        // 🔥 ABRE EL MISMO DIALOGO ELEGANTE 🔥
+        final home = HomeScreen();
+        home.showProgramDialog(context, program);
+      },
       child: Container(
-        height: 160, // se ajusta mejor al grid
+        height: 160,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           image: DecorationImage(
@@ -61,8 +65,7 @@ class ProgramCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 18, // más pequeño para 2 por fila
-                    height: 1.1,
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -73,7 +76,6 @@ class ProgramCard extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     color: Colors.white70,
                     fontSize: 12,
-                    height: 1.3,
                   ),
                 ),
               ],
