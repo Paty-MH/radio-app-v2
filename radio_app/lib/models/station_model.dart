@@ -1,3 +1,4 @@
+// This Station model represents a radio station with its name, acronym, broadcast URL, slogan, image, and social media links.
 class Station {
   final String name;
   final String acronym;

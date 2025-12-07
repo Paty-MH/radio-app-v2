@@ -1,6 +1,7 @@
 import '../models/station_model.dart';
 import '../models/program_model.dart';
 
+//This list contains Station objects that represent each station available in the application.
 const stations = <Station>[
   Station(
     name: 'Live Jazz Radio',
@@ -30,6 +31,7 @@ const stations = <Station>[
   ),
 ];
 
+//This list contains Program objects, each representing a program with its image, description, and schedule.
 const programs = <Program>[
   Program(
     title: 'DR. YESCA SHOW',

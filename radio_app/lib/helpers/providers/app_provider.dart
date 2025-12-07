@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AppProvider extends ChangeNotifier {
-  /// Estación seleccionada actualmente
+  /// Currently selected station
   int _currentStation = 0;
   int get currentStation => _currentStation;
 
-  /// Alias para compatibilidad con tu HomeScreen
   int get currentStationIndex => _currentStation;
 
-  /// Cambiar estación
+  /// Here the station changes
   void setCurrentStation(int index) {
     _currentStation = index;
     notifyListeners();
   }
 
-  /// Onboarding (si lo usas)
+  /// Onboarding
   bool _didOnboard = false;
   bool get didOnboard => _didOnboard;
 
@@ -23,7 +22,7 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Tema claro/oscuro
+  /// Light and dark theme
   bool _isDark = false;
   bool get isDark => _isDark;
 
@@ -32,9 +31,11 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Panel inferior abierto/cerrado
+  /// Lower panel open and closed
   bool _isPanelOpen = false;
   bool get isPanelOpen => _isPanelOpen;
+
+  get stations => null;
 
   void setPanelOpen(bool value) {
     _isPanelOpen = value;

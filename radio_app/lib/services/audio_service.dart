@@ -10,15 +10,15 @@ class RadioAudioHandler extends BaseAudioHandler {
 
   Future<void> playUrl(
       String url, String title, String artist, String artUrl) async {
-    // Evita errores si cambias rápido de estación
+    // Avoid mistakes if you change stations quickly
     await _player.stop();
 
-    // Manejo de carátula (URL o asset)
+    // Cover page management (URL or asset)
     final Uri artUri = artUrl.startsWith("http")
         ? Uri.parse(artUrl)
         : Uri.parse("asset:///$artUrl");
 
-    // Enviar MediaItem (para que funcione la notificación)
+    // Send MediaItem (for the notification to work) // Enviar MediaItem (para que funcione la notificación)
     mediaItem.add(
       MediaItem(
         id: url,
@@ -29,7 +29,7 @@ class RadioAudioHandler extends BaseAudioHandler {
       ),
     );
 
-    // Configurar fuente y reproducir
+    // Configure source and playback
     await _player.setUrl(url);
     await _player.play();
   }

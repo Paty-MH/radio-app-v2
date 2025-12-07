@@ -21,11 +21,11 @@ class AudioProvider extends ChangeNotifier {
   PlayerState get state => _player.playerState;
   bool get isPlaying => _player.playing;
 
-  // Estado de carga
+  // Status
   AudioStatus _status = AudioStatus.stopped;
   AudioStatus get status => _status;
 
-  // Datos de estación actual
+  // Current station
   String? _currentTitle;
   String? _currentArtist;
   String? _currentArt;
@@ -42,20 +42,18 @@ class AudioProvider extends ChangeNotifier {
   AudioProvider() {
     _init();
 
-    // ICY METADATA
     _player.icyMetadataStream.listen((metadata) {
       final icy = metadata?.info?.title ?? "";
       _icyTitleSubject.add(icy);
       notifyListeners();
     });
 
-    // Reconexión automática (sin mostrar loading al usuario)
+    // Auto-reintentar
     _player.playerStateStream.listen((state) async {
       if (!state.playing &&
           state.processingState == ProcessingState.idle &&
           _retryCount < _maxRetries) {
         _retryCount++;
-        debugPrint("Intentando reconectar... $_retryCount");
         await Future.delayed(const Duration(seconds: 2));
         if (_currentUrl != null) {
           try {
@@ -64,7 +62,7 @@ class AudioProvider extends ChangeNotifier {
               title: _currentTitle ?? '',
               artist: _currentArtist ?? '',
               artUrl: _currentArt ?? '',
-              isReconnect: true, // evita spinner
+              isReconnect: true,
             );
           } catch (_) {
             _status = AudioStatus.error;
@@ -80,18 +78,13 @@ class AudioProvider extends ChangeNotifier {
       final session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
 
-      // Inicializar just_audio_background
       await _player.setAudioSource(
-        AudioSource.uri(Uri.parse("https://fake-init.com/empty.mp3")),
+        AudioSource.uri(Uri.parse("https://fake.com/init.mp3")),
       );
       await _player.stop();
-      debugPrint("Background inicializado correctamente.");
-    } catch (e) {
-      debugPrint("Error inicializando audio: $e");
-    }
+    } catch (_) {}
   }
 
-  // Reproducir estación
   Future<void> playStation({
     required String url,
     required String title,
@@ -100,16 +93,15 @@ class AudioProvider extends ChangeNotifier {
     bool isReconnect = false,
   }) async {
     try {
-      // Evitar recargar misma estación
       if (_currentUrl == url && _player.playing) return;
 
       _retryCount = 0;
+
       _currentTitle = title;
       _currentArtist = artist;
       _currentArt = artUrl;
       _currentUrl = url;
 
-      // Mostrar loading solo si NO es reconexión
       if (!isReconnect) {
         _status = AudioStatus.loading;
         notifyListeners();
@@ -125,40 +117,47 @@ class AudioProvider extends ChangeNotifier {
 
       await _player.stop();
 
-      try {
-        await _player.setAudioSource(
-          AudioSource.uri(Uri.parse(url), tag: mediaItem),
-        );
-      } catch (e) {
-        debugPrint("❌ Error cargando audio: $e");
-        _status = AudioStatus.error;
-        notifyListeners();
-        return;
-      }
+      await _player.setAudioSource(
+        AudioSource.uri(Uri.parse(url), tag: mediaItem),
+      );
 
-      // Cambiamos estado a playing inmediatamente
       _status = AudioStatus.playing;
       notifyListeners();
 
       _player.play();
     } catch (e) {
-      debugPrint("❌ Error reproduciendo estación: $e");
       _status = AudioStatus.error;
       notifyListeners();
     }
   }
 
-  // CONTROLES
-  Future<void> pause() async {
+  // This part makes it pause
+  Future<void> pauseAll() async {
     await _player.pause();
     _status = AudioStatus.paused;
     notifyListeners();
   }
 
+  // -----------------------------------------------
+  // REANUDAR GLOBAL
+  // -----------------------------------------------
+  Future<void> resumeAll() async {
+    if (_currentUrl != null) {
+      await _player.play();
+      _status = AudioStatus.playing;
+      notifyListeners();
+    }
+  }
+
+  // -----------------------------------------------
+  // CONTROLES USADOS POR EL PLAYER
+  // -----------------------------------------------
+  Future<void> pause() async {
+    await pauseAll(); // ⬅ TAMBIÉN PAUSA TODAS
+  }
+
   Future<void> resume() async {
-    await _player.play();
-    _status = AudioStatus.playing;
-    notifyListeners();
+    await resumeAll(); // ⬅ REANUDA LA ACTUAL
   }
 
   Future<void> stop() async {

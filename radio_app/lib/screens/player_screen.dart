@@ -55,7 +55,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     },
     {
       'label': 'Twitter',
-      'asset': 'assets/icons/x.wepb',
+      'asset': 'assets/icons/x_1.png',
       'url': 'https://twitter.com/RadioactivaTx'
     },
     {

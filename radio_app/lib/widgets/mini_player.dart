@@ -35,14 +35,14 @@ class _MiniPlayerState extends State<MiniPlayer>
     // Si no hay estación cargada
     if (audio.currentUrl == null) return const SizedBox.shrink();
 
-    // Animación del disco según status
+    // ANIMACIÓN DEL DISCO
     if (audio.status == AudioStatus.playing) {
       if (!_rotationController.isAnimating) _rotationController.repeat();
     } else {
       if (_rotationController.isAnimating) _rotationController.stop();
     }
 
-    // Detectar si la imagen es URL o asset
+    // Imagen: asset o URL
     final bool isNetworkImage =
         (audio.currentArt != null && audio.currentArt!.startsWith("http"));
 
@@ -62,43 +62,58 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
     );
 
-    // Mostrar botón según estado
+    // BOTÓN PLAY / PAUSE 100% FUNCIONAL
     Widget playPauseButton;
+
     switch (audio.status) {
       case AudioStatus.loading:
         playPauseButton = const SizedBox(
           width: 40,
           height: 40,
-          child: CircularProgressIndicator(color: Colors.black, strokeWidth: 3),
+          child: CircularProgressIndicator(
+            color: Colors.black,
+            strokeWidth: 3,
+          ),
         );
         break;
+
       case AudioStatus.playing:
         playPauseButton = IconButton(
           iconSize: 40,
           icon: const Icon(Icons.pause_circle_filled, color: Colors.black),
-          onPressed: () => audio.pause(),
+          onPressed: () async {
+            await audio.pause(); // ⬅ PAUSA REAL
+          },
         );
         break;
+
       case AudioStatus.paused:
+        playPauseButton = IconButton(
+          iconSize: 40,
+          icon: const Icon(Icons.play_circle_fill, color: Colors.black),
+          onPressed: () async {
+            await audio.resume(); // ⬅ REANUDA REAL
+          },
+        );
+        break;
+
       case AudioStatus.stopped:
         playPauseButton = IconButton(
           iconSize: 40,
           icon: const Icon(Icons.play_circle_fill, color: Colors.black),
-          onPressed: () => audio.resume(),
+          onPressed: () async {
+            await audio.playStation(
+              url: audio.currentUrl!,
+              title: audio.currentTitle ?? '',
+              artist: audio.currentArtist ?? '',
+              artUrl: audio.currentArt ?? '',
+            );
+          },
         );
         break;
-      case AudioStatus.error:
+
       default:
-        playPauseButton = IconButton(
-          iconSize: 40,
-          icon: const Icon(Icons.error, color: Colors.red),
-          onPressed: () => audio.playStation(
-            url: audio.currentUrl!,
-            title: audio.currentTitle ?? '',
-            artist: audio.currentArtist ?? '',
-            artUrl: audio.currentArt ?? '',
-          ),
-        );
+        playPauseButton = const Icon(Icons.error, color: Colors.red, size: 40);
     }
 
     return Container(
@@ -116,12 +131,19 @@ class _MiniPlayerState extends State<MiniPlayer>
           topRight: Radius.circular(18),
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, -2))
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 6,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       child: Row(
         children: [
-          RotationTransition(turns: _rotationController, child: stationImage),
+          RotationTransition(
+            turns: _rotationController,
+            child: stationImage,
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -131,15 +153,19 @@ class _MiniPlayerState extends State<MiniPlayer>
                 Text(
                   audio.currentTitle ?? '',
                   style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   audio.currentArtist ?? '',
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.black87,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -1,10 +1,7 @@
-// lib/screens/home_screen.dart
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:radio_app/models/station_model.dart';
 
 import '../helpers/constants.dart';
 import '../helpers/providers/audio_provider.dart';
@@ -13,11 +10,13 @@ import '../helpers/providers/app_provider.dart';
 import '../widgets/station_card.dart';
 import '../widgets/program_carousel.dart';
 import '../models/program_model.dart';
+import '../models/station_model.dart';
 
 import '../widgets/app_drawer.dart';
 import '../widgets/social_icons.dart';
 import 'player_screen.dart';
 
+// This is the main screen
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -27,9 +26,7 @@ class HomeScreen extends StatelessWidget {
       drawer: const AppDrawer(),
       body: Column(
         children: [
-          // HEADER FIJO (NO SE ESCONDE)
           _bannerHeader(context),
-
           Expanded(
             child: Stack(
               children: [
@@ -41,7 +38,7 @@ class HomeScreen extends StatelessWidget {
                     _titleSection('Nuestras', 'Estaciones'),
                     const SizedBox(height: 10),
 
-                    // LISTA DE ESTACIONES
+                    //This is the list of stations
                     ...List.generate(stations.length, (i) {
                       final s = stations[i];
                       return Padding(
@@ -50,9 +47,7 @@ class HomeScreen extends StatelessWidget {
                         child: StationCard(
                           station: s,
                           onTap: () {
-                            // actualizar estación actual en AppProvider
                             context.read<AppProvider>().setCurrentStation(i);
-                            // reproducir en AudioProvider
                             context.read<AudioProvider>().playStation(
                                   url: s.url,
                                   title: s.name,
@@ -60,14 +55,13 @@ class HomeScreen extends StatelessWidget {
                                   artUrl: s.imageAsset,
                                 );
                           },
-                          onLongPress: () {},
                         ),
                       );
                     }),
 
                     const SizedBox(height: 14),
 
-                    // PROGRAMAS
+                    // This is where the program titles go
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
@@ -115,9 +109,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // =======================================================
-  // HEADER EXACTO — FIJO Y SIN MOVERSE
-  // =======================================================
+// This is the header with the background and logo
   Widget _bannerHeader(BuildContext context) {
     return Container(
       height: 200,
@@ -140,8 +132,6 @@ class HomeScreen extends StatelessWidget {
                 builder: (ctx) {
                   return IconButton(
                     icon: const Icon(Icons.menu, color: Colors.black),
-                    // usar Scaffold.of(ctx) puede mostrar un warning en nuevas versiones;
-                    // si tu proyecto usa ScaffoldMessenger, considera cambiarlo.
                     onPressed: () => Scaffold.of(ctx).openDrawer(),
                   );
                 },
@@ -159,6 +149,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  // Yellow and black titles
   Widget _titleSection(String t1, String t2) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -191,9 +182,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // =======================================================
-  // DIALOGO PROGRAMAS (CLONADO)
-  // =======================================================
+  // This is the modal that displays program information
   void showProgramDialog(BuildContext context, Program p) {
     final String today = _getToday();
 
@@ -243,25 +232,6 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: GestureDetector(
-                              onTap: () {
-                                // aquí podrías implementar fullscreen si quieres
-                              },
-                              child: Container(
-                                width: 38,
-                                height: 38,
-                                decoration: const BoxDecoration(
-                                  color: Colors.black87,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.fullscreen,
-                                    color: Colors.white, size: 23),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       Padding(
@@ -287,6 +257,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 25),
+                            // Schedules
                             Text(
                               'Horarios de emisión',
                               style: GoogleFonts.poppins(
@@ -296,6 +267,7 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 10),
+                            // Timetable boxes per day
                             Wrap(
                               spacing: 10,
                               runSpacing: 10,
@@ -355,9 +327,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ==============================================================
-//   FUNCIÓN PARA DETECTAR DÍA ACTUAL (Lunes, Martes, etc.)
-// ==============================================================
+//// This function returns the current day as text.
 String _getToday() {
   final days = {
     1: "Lunes",
@@ -371,10 +341,7 @@ String _getToday() {
   return days[DateTime.now().weekday]!;
 }
 
-// =======================================================
-// MINI PLAYER (CON PAUSA QUE SÍ FUNCIONA)
-// =======================================================
-
+// This is the mini player
 class _MiniPlayer extends StatefulWidget {
   const _MiniPlayer();
 
@@ -402,6 +369,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
     super.dispose();
   }
 
+//This stops the animation when it starts, depending on the audio state.
   void _updateRotation(bool playing) {
     if (playing) {
       if (!_rotationController.isAnimating) _rotationController.repeat();
@@ -412,6 +380,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
     }
   }
 
+//This opens the player in full screen
   void _openPlayerSheet(BuildContext context, Station s) {
     showModalBottomSheet(
       context: context,
@@ -434,11 +403,12 @@ class _MiniPlayerState extends State<_MiniPlayer>
     final app = context.watch<AppProvider>();
 
     final idx = app.currentStationIndex;
-    if (idx == null || idx < 0 || idx >= stations.length)
+    if (idx == null || idx < 0 || idx >= stations.length) {
       return const SizedBox.shrink();
+    }
 
     final s = stations[idx];
-
+    //This is the mini player box
     return GestureDetector(
       onTap: () => _openPlayerSheet(context, s),
       child: Container(
@@ -462,6 +432,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
         ),
         child: Row(
           children: [
+            //This is the rotating round image
             StreamBuilder<bool>(
               stream: audio.playingStream,
               builder: (context, snap) {
@@ -487,7 +458,10 @@ class _MiniPlayerState extends State<_MiniPlayer>
                 );
               },
             ),
+
             const SizedBox(width: 12),
+
+            //This is for the station name and artist
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -524,6 +498,8 @@ class _MiniPlayerState extends State<_MiniPlayer>
                 ],
               ),
             ),
+
+            // BOTÓN PAUSA/PLAY
             StreamBuilder<bool>(
               stream: audio.playingStream,
               builder: (context, snap) {

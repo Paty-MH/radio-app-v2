@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../helpers/constants.dart';
 import '../widgets/program_card.dart';
 import '../models/program_model.dart';
-import '../screens/home_screen.dart'; // 👈 NECESARIO para usar showProgramDialog
+import '../screens/home_screen.dart';
 
 class ProgramsScreen extends StatelessWidget {
   const ProgramsScreen({super.key});
@@ -39,18 +39,16 @@ class ProgramsScreen extends StatelessWidget {
         ),
       ),
 
-      // ───────────────────────────────────────────────
-      // GRID DE PROGRAMAS (2 COLUMNAS)
-      // ───────────────────────────────────────────────
+      //two-column programs
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: GridView.builder(
           itemCount: programs.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // 2 por fila
-            crossAxisSpacing: 12, // espacio horizontal
-            mainAxisSpacing: 12, // espacio vertical
-            childAspectRatio: 0.78, // proporción como las imágenes
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.78,
           ),
           itemBuilder: (_, i) {
             final Program p = programs[i];
@@ -58,7 +56,7 @@ class ProgramsScreen extends StatelessWidget {
             return ProgramCard(
               program: p,
               onTap: () {
-                // 🔥 ABRIR EL MISMO MODAL QUE EN EL HOME 🔥
+                //OPEN THE SAME MODAL AS ON THE HOME
                 HomeScreen().showProgramDialog(context, p);
               },
             );

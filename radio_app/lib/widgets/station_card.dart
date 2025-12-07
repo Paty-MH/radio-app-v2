@@ -10,13 +10,11 @@ import '../models/station_model.dart';
 class StationCard extends StatelessWidget {
   final Station station;
   final VoidCallback onTap;
-  final VoidCallback? onLongPress;
 
   const StationCard({
     super.key,
     required this.station,
     required this.onTap,
-    this.onLongPress,
   });
 
   @override
@@ -28,10 +26,27 @@ class StationCard extends StatelessWidget {
         stations[app.currentStationIndex!].name == station.name;
 
     final bool isPlaying = isCurrent && audio.status == AudioStatus.playing;
+    final bool isPaused = isCurrent && audio.status == AudioStatus.paused;
 
     return GestureDetector(
-      onLongPress: onLongPress,
-      onTap: onTap,
+      onTap: () {
+        if (isCurrent) {
+          if (audio.status == AudioStatus.playing) {
+            audio.pause();
+          } else if (audio.status == AudioStatus.paused) {
+            audio.resume();
+          } else {
+            audio.playStation(
+              url: station.url,
+              title: station.name,
+              artist: station.slogan,
+              artUrl: station.imageAsset,
+            );
+          }
+        } else {
+          onTap();
+        }
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(14),
@@ -88,49 +103,39 @@ class StationCard extends StatelessWidget {
               ),
             ),
 
-            // BOTÓN PLAY / PAUSE / CARGA
-            Builder(builder: (_) {
-              if (isCurrent) {
-                switch (audio.status) {
-                  case AudioStatus.loading:
-                    return const SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: Colors.red,
-                      ),
-                    );
-                  case AudioStatus.error:
-                    return const Icon(
-                      Icons.error,
-                      size: 34,
-                      color: Colors.red,
-                    );
-                  case AudioStatus.playing:
-                    return Icon(
-                      Icons.pause_circle_filled,
-                      size: 34,
-                      color: Colors.red,
-                    );
-                  case AudioStatus.paused:
-                  case AudioStatus.stopped:
-                  default:
-                    return Icon(
-                      Icons.play_circle_fill,
-                      size: 34,
-                      color: Colors.black87,
-                    );
+            // PLAY / PAUSE ICON
+            Builder(
+              builder: (_) {
+                if (isCurrent) {
+                  switch (audio.status) {
+                    case AudioStatus.loading:
+                      return const SizedBox(
+                        width: 34,
+                        height: 34,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.red,
+                        ),
+                      );
+                    case AudioStatus.error:
+                      return const Icon(Icons.error,
+                          size: 34, color: Colors.red);
+                    case AudioStatus.playing:
+                      return const Icon(Icons.pause_circle_filled,
+                          size: 34, color: Colors.red);
+                    case AudioStatus.paused:
+                      return const Icon(Icons.play_circle_fill,
+                          size: 34, color: Colors.black87);
+                    default:
+                      return const Icon(Icons.play_circle_fill,
+                          size: 34, color: Colors.black87);
+                  }
+                } else {
+                  return const Icon(Icons.play_circle_fill,
+                      size: 34, color: Colors.black87);
                 }
-              } else {
-                // Otra estación no seleccionada
-                return const Icon(
-                  Icons.play_circle_fill,
-                  size: 34,
-                  color: Colors.black87,
-                );
-              }
-            }),
+              },
+            ),
           ],
         ),
       ),

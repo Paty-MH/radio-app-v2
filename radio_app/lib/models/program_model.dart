@@ -1,3 +1,4 @@
+// This program contains the title, description, image, and schedule of the program.
 class Program {
   final String title;
   final String description;
@@ -12,6 +13,7 @@ class Program {
   });
 }
 
+// This ProgramSchedule represents each individual schedule, indicating the day, start time, and end time.
 class ProgramSchedule {
   final String day;
   final String start;
