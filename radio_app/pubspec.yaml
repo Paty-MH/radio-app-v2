@@ -11,17 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Compartir
+  # Share
   share_plus: ^10.0.2
-
-  # Información de versión
   package_info_plus: ^8.0.0
 
-  # Reproductor
+  # Player
   just_audio: ^0.9.39
   audio_session: ^0.1.18
 
-  # Just Audio Background (versión estable recomendada para Android 33+)
   just_audio_background: ^0.0.1-beta.16
 
   # Streams
@@ -48,13 +45,13 @@ flutter:
     - assets/images/
     - assets/icons/
 
-# Configuración de íconos
+# Icon Settings
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icons/app_icon.png"
 
-  # Opcional: soporte para otras plataformas
+  # support for other platforms
   web:
     generate: true
     image_path: "assets/icons/app_icon.png"
