@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SocialIconsSection extends StatelessWidget {
   const SocialIconsSection({super.key});
-
+//FUNCTION TO OPEN EXTERNAL LINKS
   Future<void> _open(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
@@ -17,7 +17,7 @@ class SocialIconsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ───────── TÍTULO "Síguenos por aquí también" ─────────
+        //TITLE "Follow us here too
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: RichText(
@@ -39,8 +39,7 @@ class SocialIconsSection extends StatelessWidget {
         ),
 
         const SizedBox(height: 12),
-
-        // ───────── CONTENEDOR PRINCIPAL ─────────
+        // MAIN CONTAINER
         Center(
           child: Container(
             padding: const EdgeInsets.all(18),
@@ -93,7 +92,7 @@ class SocialIconsSection extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // SEGUNDA FILA
+                // SECOND ROW
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

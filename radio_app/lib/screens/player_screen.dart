@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../helpers/providers/audio_provider.dart';
 
+//This is the radio player screen
 class PlayerScreen extends StatefulWidget {
   final String streamUrl;
   final String artUrl;
@@ -27,7 +28,7 @@ class _PlayerScreenState extends State<PlayerScreen>
   late AnimationController _rotationController;
 
   bool showSocialBar = false;
-
+//This is a list of links (social networks and sharing)
   final List<Map<String, dynamic>> linkItems = [
     {
       'type': 'share',
@@ -73,12 +74,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   void initState() {
     super.initState();
-
+//Here Initializes the spinning disc animation
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 12),
     );
-
+//Here Plays automatically when the screen is opened
     final audio = Provider.of<AudioProvider>(context, listen: false);
 
     audio.playStation(
@@ -95,9 +96,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     super.dispose();
   }
 
-  // ---------------------------------------------------
-  // BARRA SOCIAL (AHORA ICONOS CUADRADOS REDONDEADOS)
-  // ---------------------------------------------------
+  //here goes the social media sidebar
   Widget buildSocialBar() {
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 200),
@@ -117,6 +116,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             ),
           ],
         ),
+        //Here goes Vertical list of icons
         child: Column(
           children: [
             ...linkItems.map((item) {
@@ -126,9 +126,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                 onTap: () async {
                   if (isShare) {
                     await Share.share(
+                      ////Share station link
                       "🎧 Escucha ${widget.stationName}\n${widget.streamUrl}",
                     );
                   } else {
+                    //This opens external links
                     final uri = Uri.parse(item['url']);
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                   }
@@ -163,7 +165,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 
             const SizedBox(height: 8),
 
-            // BOTÓN CERRAR — AHORA CUADRADO
+            //This is the close bar button
             GestureDetector(
               onTap: () => setState(() => showSocialBar = false),
               child: Container(
@@ -208,10 +210,13 @@ class _PlayerScreenState extends State<PlayerScreen>
               child: Container(color: Colors.black.withOpacity(0.55)),
             ),
           ),
+          // Barra social animada
           buildSocialBar(),
+          // MAIN CONTENT
           Column(
             children: [
               const SizedBox(height: 30),
+              // Arrow to close screen
               Padding(
                 padding: const EdgeInsets.only(left: 20),
                 child: Align(
@@ -226,6 +231,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ),
               ),
               const SizedBox(height: 20),
+              //rotating image disc
               Center(
                 child: RotationTransition(
                   turns: _rotationController,
@@ -239,6 +245,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ),
               ),
               const SizedBox(height: 30),
+              //Here goes the station name
               Text(
                 title,
                 style: const TextStyle(

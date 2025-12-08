@@ -499,7 +499,7 @@ class _MiniPlayerState extends State<_MiniPlayer>
               ),
             ),
 
-            // BOTÓN PAUSA/PLAY
+            //This is the pause and play button
             StreamBuilder<bool>(
               stream: audio.playingStream,
               builder: (context, snap) {

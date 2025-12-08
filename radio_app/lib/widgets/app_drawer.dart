@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// This custom side drawer for the app.
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
 
@@ -11,6 +12,7 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
+  // Variable where we will store the app version
   String version = "";
 
   @override
@@ -19,6 +21,7 @@ class _AppDrawerState extends State<AppDrawer> {
     _loadVersion();
   }
 
+// This part gets the app version from the system
   Future<void> _loadVersion() async {
     try {
       final info = await PackageInfo.fromPlatform();
@@ -30,6 +33,7 @@ class _AppDrawerState extends State<AppDrawer> {
     }
   }
 
+// Opens external links in a browser or installed apps
   Future<void> _openLink(String url) async {
     final Uri uri = Uri.parse(url);
 
@@ -90,7 +94,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       ),
                     ),
 
-                    // Android
+                    // This is the Android button
                     GestureDetector(
                       onTap: () => _openLink("https://play.google.com/store"),
                       child: Container(
@@ -120,6 +124,7 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
+// Create each Drawer item with its icon, text, and action
   Widget buildDrawerTile(IconData icon, String text, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: const Color(0xFFD95E3D), size: 28),
@@ -142,7 +147,7 @@ class _AppDrawerState extends State<AppDrawer> {
     return Drawer(
       child: Column(
         children: [
-          // ✔ Header amarillo con logo como en tu imagen
+          //Yellow header with logo and image
           Container(
             width: double.infinity,
             color: const Color(0xFFFFD600),
@@ -164,6 +169,7 @@ class _AppDrawerState extends State<AppDrawer> {
                   Share.share(
                       "🎧 ¡Escucha Radioactiva Tx! https://radioactivatx.org");
                 }),
+                // Rate Option
                 buildDrawerTile(Icons.star, "¡Califica nuestra app!", () {
                   _openLink("https://www.radioactivatx.org/acerca-de/");
                 }),
@@ -178,10 +184,12 @@ class _AppDrawerState extends State<AppDrawer> {
                     ],
                   );
                 }),
+                // Policy
                 buildDrawerTile(Icons.article, "Política de Privacidad", () {
                   _openLink(
                       "https://www.radioactivatx.org/politica-privacidad/");
                 }),
+                // Modal Listen to us
                 buildDrawerTile(Icons.radio, "Escúchanos en", () {
                   _showListenDialog();
                 }),

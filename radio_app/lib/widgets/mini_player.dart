@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../helpers/providers/audio_provider.dart';
 
+// Mini player that appears at the bottom.
+// It displays an image, title, artist, animation, and Play/Pause controls.
 class MiniPlayer extends StatefulWidget {
   const MiniPlayer({super.key});
 
@@ -32,17 +34,17 @@ class _MiniPlayerState extends State<MiniPlayer>
   Widget build(BuildContext context) {
     final audio = context.watch<AudioProvider>();
 
-    // Si no hay estación cargada
+    // If a station has not yet been loaded, the MiniPlayer will not be displayed
     if (audio.currentUrl == null) return const SizedBox.shrink();
 
-    // ANIMACIÓN DEL DISCO
+    //This is the disc animation control
     if (audio.status == AudioStatus.playing) {
       if (!_rotationController.isAnimating) _rotationController.repeat();
     } else {
       if (_rotationController.isAnimating) _rotationController.stop();
     }
 
-    // Imagen: asset o URL
+    //This is how the image is handled
     final bool isNetworkImage =
         (audio.currentArt != null && audio.currentArt!.startsWith("http"));
 
@@ -62,7 +64,7 @@ class _MiniPlayerState extends State<MiniPlayer>
             ),
     );
 
-    // BOTÓN PLAY / PAUSE 100% FUNCIONAL
+    // This is the play, pause, and loading button
     Widget playPauseButton;
 
     switch (audio.status) {
@@ -82,17 +84,17 @@ class _MiniPlayerState extends State<MiniPlayer>
           iconSize: 40,
           icon: const Icon(Icons.pause_circle_filled, color: Colors.black),
           onPressed: () async {
-            await audio.pause(); // ⬅ PAUSA REAL
+            await audio.pause();
           },
         );
         break;
-
+      // PLAY button when paused
       case AudioStatus.paused:
         playPauseButton = IconButton(
           iconSize: 40,
           icon: const Icon(Icons.play_circle_fill, color: Colors.black),
           onPressed: () async {
-            await audio.resume(); // ⬅ REANUDA REAL
+            await audio.resume();
           },
         );
         break;
@@ -115,7 +117,7 @@ class _MiniPlayerState extends State<MiniPlayer>
       default:
         playPauseButton = const Icon(Icons.error, color: Colors.red, size: 40);
     }
-
+    // This is the main container
     return Container(
       height: 85,
       width: double.infinity,
@@ -138,6 +140,7 @@ class _MiniPlayerState extends State<MiniPlayer>
           ),
         ],
       ),
+      // INTERNAL CONTENT
       child: Row(
         children: [
           RotationTransition(

@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/program_model.dart';
 import '../screens/home_screen.dart'; // ← IMPORTA donde está showProgramDialog
 
+//Visual card that displays a program.
+// Pressing it opens an elegant dialog from the HomeScreen.
 class ProgramCard extends StatelessWidget {
   final Program program;
 
@@ -15,13 +17,14 @@ class ProgramCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // When you touch the card, the program dialog opens
       onTap: () {
-        // 🔥 ABRE EL MISMO DIALOGO ELEGANTE 🔥
         final home = HomeScreen();
         home.showProgramDialog(context, program);
       },
       child: Container(
         height: 160,
+        // Visual style of the card
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           image: DecorationImage(
