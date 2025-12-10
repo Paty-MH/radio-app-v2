@@ -27,6 +27,7 @@ class ProgramCard extends StatelessWidget {
         // Visual style of the card
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
+          // Visual style of the card
           image: DecorationImage(
             image: AssetImage(program.imageAsset),
             fit: BoxFit.cover,
@@ -35,6 +36,7 @@ class ProgramCard extends StatelessWidget {
               BlendMode.darken,
             ),
           ),
+          // Card shadow
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.25),
@@ -43,6 +45,7 @@ class ProgramCard extends StatelessWidget {
             ),
           ],
         ),
+        // GRADIENT TOP LAYER
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -57,6 +60,7 @@ class ProgramCard extends StatelessWidget {
               ],
             ),
           ),
+          // PROGRAM TEXT
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Column(

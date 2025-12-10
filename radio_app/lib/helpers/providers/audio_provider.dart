@@ -73,6 +73,8 @@ class AudioProvider extends ChangeNotifier {
     });
   }
 
+  get currentStation => null;
+
   Future<void> _init() async {
     try {
       final session = await AudioSession.instance;
@@ -136,11 +138,9 @@ class AudioProvider extends ChangeNotifier {
     await _player.pause();
     _status = AudioStatus.paused;
     notifyListeners();
-  }
+  } 
 
-  // -----------------------------------------------
-  // REANUDAR GLOBAL
-  // -----------------------------------------------
+  // This part makes it resume
   Future<void> resumeAll() async {
     if (_currentUrl != null) {
       await _player.play();
@@ -148,16 +148,13 @@ class AudioProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // -----------------------------------------------
-  // CONTROLES USADOS POR EL PLAYER
-  // -----------------------------------------------
+  // This is used for player controls
   Future<void> pause() async {
-    await pauseAll(); // ⬅ TAMBIÉN PAUSA TODAS
+    await pauseAll();
   }
 
   Future<void> resume() async {
-    await resumeAll(); // ⬅ REANUDA LA ACTUAL
+    await resumeAll(); 
   }
 
   Future<void> stop() async {
@@ -172,4 +169,8 @@ class AudioProvider extends ChangeNotifier {
     _icyTitleSubject.close();
     super.dispose();
   }
+
+  void togglePlay() {}
+
+  void hidePlayer() {}
 }

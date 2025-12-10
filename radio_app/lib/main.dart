@@ -16,19 +16,24 @@ import 'helpers/constants.dart';
 import 'app_theme.dart';
 
 Future<void> main() async {
+  // Ensures Flutter bindings are initialized before running async code
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 NECESARIO PARA SONIDO EN SEGUNDO PLANO
+  // Required to enable background audio playback
   await JustAudioBackground.init(
-    androidNotificationChannelId: 'radio.tx.channel',
-    androidNotificationChannelName: 'Radioactiva Tx',
-    androidNotificationOngoing: true,
+    androidNotificationChannelId: 'radio.tx.channel', // Notification channel ID
+    androidNotificationChannelName: 'Radioactiva Tx', // Name shown in Android notifications
+    androidNotificationOngoing: true, // Keeps notification active while playing
   );
 
+  // Run the app and inject providers
   runApp(
     MultiProvider(
       providers: [
+        // Provider that manages all audio playback logic
         ChangeNotifierProvider(create: (_) => AudioProvider()),
+
+        // Provider that manages app state (current station, UI mode, etc.)
         ChangeNotifierProvider(create: (_) => AppProvider()),
       ],
       child: const MyApp(),
@@ -43,24 +48,32 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Radioactiva Tx',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      initialRoute: '/splash',
-      routes: {
-        '/splash': (_) => const SplashScreen(),
-        '/onboarding': (_) => OnboardingScreen(),
-        '/home': (_) => const HomeScreen(),
-        '/programs': (_) => const ProgramsScreen(),
+      debugShowCheckedModeBanner: false, // Hides the debug banner
+      theme: AppTheme.light, // App theme configuration
 
-        // 🔥 PLAYER CON DATOS DINÁMICOS DE LA ESTACIÓN
+      // First screen shown when the app opens
+      initialRoute: '/splash',
+
+      // All registered routes of the app
+      routes: {
+        '/splash': (_) => const SplashScreen(), // Splash screen
+        '/onboarding': (_) => OnboardingScreen(), // Onboarding
+        '/home': (_) => const HomeScreen(), // Main home screen
+        '/programs': (_) => const ProgramsScreen(), // Programs screen
+
+        // 🔥 Player screen with dynamic station data
         '/player': (context) {
+          // Access the app provider (no rebuild on changes)
           final app = Provider.of<AppProvider>(context, listen: false);
+
+          // Get the selected station based on current index
           final s = stations[app.currentStationIndex];
 
+          // Pass station data to PlayerScreen
           return PlayerScreen(
-            streamUrl: s.url,
-            artUrl: s.imageAsset,
-            stationName: s.name,
+            streamUrl: s.url,          // Streaming URL
+            artUrl: s.imageAsset,      // Station artwork
+            stationName: s.name,       // Station name
           );
         },
       },

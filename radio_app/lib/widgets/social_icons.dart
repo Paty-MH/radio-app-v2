@@ -125,7 +125,7 @@ class SocialIconsSection extends StatelessWidget {
     );
   }
 
-  // ────────── WIDGET DE CADA ICONO ──────────
+  //WIDGET THAT DRAWS AN INDIVIDUAL SOCIAL NETWORK ICON
   Widget _socialIcon({
     required String asset,
     required Color color,
